@@ -1,6 +1,6 @@
 # Essential Links for Statistical Programmers
 
-**2,422 curated resources** across 20 sections — the most comprehensive free reference directory for clinical statistical programmers.
+**2,419 curated resources** across 20 sections — the most comprehensive free reference directory for clinical statistical programmers.
 
 🔗 **Live site:** [clinicalstat.github.io/essential-links](https://clinicalstat.github.io/essential-links/)
 
@@ -58,7 +58,7 @@ Or visit [clinicalstat.github.io/essential-links](https://clinicalstat.github.io
 
 ## Excel Version
 
-`Essential_Links_For_Statistical_Programmers.xlsx` — same 2,422 entries with 20 data sheets, hyperlinks, auto-filters, and category headers.
+`Essential_Links_For_Statistical_Programmers.xlsx` — same 2,419 entries with 20 data sheets, hyperlinks, auto-filters, and category headers.
 
 ## Contributing
 
@@ -68,6 +68,7 @@ Found a broken link? Missing a resource? Open an issue or PR.
 
 | Version | Date | Resources | Sections | Highlights |
 |---------|------|-----------|----------|------------|
+| 7.0 | Apr 2026 | 2,419 | 20 | Link quality audit: 233 links verified/fixed, conservative fallbacks for unverifiable URLs |
 | 6.0 | Apr 2026 | 2,422 | 20 | 422 new free resources: 200+ learning entries, 110+ R/Python/CLI tools, expanded TFL/StatMethods/PV/RWD |
 | 5.0 | Apr 2026 | 2,000 | 20 | SAS Docs, TFL & Viz, Free Learning sections; ADaM practical guidance |
 | 4.0 | Apr 2026 | 1,732 | 17 | ICH section, SAP/Protocol, Define-XML expansion, mobile redesign |
