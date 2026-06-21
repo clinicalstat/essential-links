@@ -608,6 +608,42 @@ html{scrollbar-width:thin;scrollbar-color:var(--sub2) transparent}
 .mobile-section-card{transition:transform .15s,border-color .15s,background .15s}
 .mobile-section-card:hover{transform:translateY(-1px);border-color:var(--teal-border)}
 
+/* ============================================================
+   COMPACT HERO (v8.2) — slim band so resources show immediately
+   ============================================================ */
+.hero{padding:0.7rem 1.5rem 1.55rem}
+.hero-top{margin-bottom:0.25rem}
+.hero h1{font-size:1.55rem;margin-bottom:0.1rem;line-height:1.08}
+.hero h1 br{display:none}
+.hero-sub{font-size:0.76rem;margin-bottom:0;max-width:600px}
+.hero-author{display:none}
+/* counters are duplicated by the stats bar under the search → hide them in the hero */
+.counters{display:none}
+.search-section{margin-top:-1.15rem}
+@media(min-width:769px){.hero h1{font-size:1.7rem}}
+@media(max-width:768px){
+  .hero{padding:0.6rem 1rem 1.5rem}
+  .hero h1{font-size:1.25rem}
+  .hero-sub{font-size:0.7rem}
+  .search-section{margin-top:-1rem}
+}
+
+/* ============================================================
+   LIVE CHATBOT (v8.2) — online presence + motion
+   ============================================================ */
+.chat-head{background:linear-gradient(135deg,var(--navy),#17283f)}
+.chat-avatar{box-shadow:0 4px 14px rgba(20,184,166,0.4);position:relative}
+.chat-online{display:inline-flex;align-items:center;gap:5px;color:rgba(255,255,255,0.78)!important;font-weight:600}
+.chat-online-dot{width:7px;height:7px;border-radius:50%;background:#22C55E;box-shadow:0 0 0 0 rgba(34,197,94,0.7);animation:livePulse 1.8s infinite}
+@keyframes livePulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,0.65)}70%{box-shadow:0 0 0 7px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+.chat-fab::after{content:'';position:absolute;top:7px;right:7px;width:12px;height:12px;border-radius:50%;background:#22C55E;border:2.5px solid var(--navy);box-shadow:0 0 0 0 rgba(34,197,94,0.6);animation:livePulse 1.8s infinite}
+.chat-fab.open::after{display:none}
+.chat-msg{animation:chatMsgIn .3s cubic-bezier(.2,.7,.3,1) both}
+@keyframes chatMsgIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+.chat-send{background:linear-gradient(135deg,var(--teal),#6366F1)}
+.chat-send:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.chat-sug:hover{background:var(--teal-bg);border-color:var(--teal);color:var(--teal);transform:translateY(-1px)}
+
 </style>
 </head>
 <body>
@@ -675,7 +711,7 @@ html{scrollbar-width:thin;scrollbar-color:var(--sub2) transparent}
 <div class="chat-avatar">&#9997;</div>
 <div class="chat-head-text">
 <h3>Resource Finder</h3>
-<p>Ask me anything about clinical programming resources</p>
+<p><span class="chat-online"><span class="chat-online-dot"></span>Online &middot; ready to help</span></p>
 </div>
 </div>
 <div class="chat-body" id="chatBody">
