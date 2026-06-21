@@ -646,7 +646,7 @@ html{scrollbar-width:thin;scrollbar-color:var(--sub2) transparent}
 .chat-send:hover{filter:brightness(1.08);transform:translateY(-1px)}
 .chat-sug:hover{background:var(--teal-bg);border-color:var(--teal);color:var(--teal);transform:translateY(-1px)}
 
-/* --- "Unclear/bot-protected" link flag --- */
+/* --- "may not always open" link flag --- */
 .item-flag{
   font-family:'Outfit',sans-serif;font-size:0.6rem;font-weight:600;
   color:#B45309;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.32);
@@ -655,6 +655,17 @@ html{scrollbar-width:thin;scrollbar-color:var(--sub2) transparent}
 }
 [data-theme="dark"] .item-flag{color:#FCD34D;background:rgba(245,158,11,0.14);border-color:rgba(245,158,11,0.3)}
 .item:has(.item-flag)::before{background:linear-gradient(180deg,#F59E0B,#B45309);opacity:.55}
+
+/* --- like / dislike feedback buttons --- */
+.vote-group{display:inline-flex;gap:3px;align-items:center}
+.vote{width:27px;height:27px;border:none;border-radius:8px;background:var(--bg2);cursor:pointer;
+  font-size:0.76rem;line-height:1;display:inline-flex;align-items:center;justify-content:center;
+  padding:0;transition:all .15s;filter:grayscale(1);opacity:.6}
+.vote:hover{background:var(--border);filter:grayscale(0);opacity:1;transform:translateY(-1px)}
+.vote.on{filter:grayscale(0);opacity:1}
+.vote.on[data-val="1"]{background:var(--teal-bg);box-shadow:inset 0 0 0 1px var(--teal-border)}
+.vote.vd.on{background:rgba(239,68,68,0.13);box-shadow:inset 0 0 0 1px rgba(239,68,68,0.35)}
+@media(max-width:768px){.vote{width:30px;height:30px}}
 
 </style>
 </head>
@@ -1115,7 +1126,7 @@ return t.replace(re,'<span class="hl">$1</span>');
 function copyLink(url,btn){
 navigator.clipboard.writeText(url).then(()=>{
 btn.classList.add('copied');btn.innerHTML='&#10003;';
-const toast=document.getElementById('toast');toast.classList.add('show');
+const toast=document.getElementById('toast');toast.textContent='Link copied!';toast.classList.add('show');
 setTimeout(()=>{toast.classList.remove('show');btn.classList.remove('copied');btn.innerHTML='&#9741;'},1500);
 });
 }
@@ -1125,8 +1136,23 @@ function toggleCat(key){collapsed[key]=(collapsed[key]===false)?true:false;rende
 function favIco(url){
 try{var h=new URL(url).hostname;return '<img class="item-fav" loading="lazy" alt="" src="https://icons.duckduckgo.com/ip3/'+h+'.ico" onerror="this.style.visibility=\'hidden\'">';}catch(e){return '';}
 }
+/* ---- link feedback: like = works, dislike = broken (stored locally; optional central endpoint for quarterly review) ---- */
+var VOTES={};try{VOTES=JSON.parse(localStorage.getItem('el_votes')||'{}')}catch(e){VOTES={}}
+var FEEDBACK_ENDPOINT=''; // paste a Formspree / Google Apps Script URL here to collect votes centrally
+function showToast(msg){var t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.classList.add('show');clearTimeout(window._tt);window._tt=setTimeout(function(){t.classList.remove('show')},2000);}
+function sendFeedback(url,val){if(!FEEDBACK_ENDPOINT)return;try{fetch(FEEDBACK_ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:url,vote:val>0?'works':'broken',ts:new Date().toISOString()})});}catch(e){}}
+function vote(btn){
+var url=btn.getAttribute('data-u');var val=parseInt(btn.getAttribute('data-val'),10);
+VOTES[url]=(VOTES[url]===val)?0:val;
+try{localStorage.setItem('el_votes',JSON.stringify(VOTES))}catch(e){}
+var bs=btn.parentNode.querySelectorAll('.vote');
+for(var i=0;i<bs.length;i++){var v=parseInt(bs[i].getAttribute('data-val'),10);if(VOTES[url]===v&&v!==0)bs[i].classList.add('on');else bs[i].classList.remove('on');}
+if(VOTES[url]!==0){sendFeedback(url,val);showToast(val>0?'Thanks! Marked as working \u2713':'Thanks \u2014 I\u2019ll review this link \u2713');}
+}
+function voteBtns(u){var e=u.replace(/"/g,'&quot;');var up=VOTES[u]===1?' on':'';var dn=VOTES[u]===-1?' on':'';
+return '<span class="vote-group"><button class="vote'+up+'" data-u="'+e+'" data-val="1" onclick="vote(this)" title="This link works for me" aria-label="Mark link working">\u{1F44D}</button><button class="vote vd'+dn+'" data-u="'+e+'" data-val="-1" onclick="vote(this)" title="This link did not work" aria-label="Mark link broken">\u{1F44E}</button></span>';}
 function flagBadge(f){
-if(f==='cf')return '<span class="item-flag" title="This site uses Cloudflare / bot protection. It normally works in a web browser, but may briefly show a verification page or occasionally be unavailable.">&#9888;&#65039; bot-protected — may need a moment</span>';
+if(f==='cf')return '<span class="item-flag" title="Heads up from me: I could not auto-confirm this one — a few sites occasionally show a verification page or load slowly. It usually opens fine in a normal browser. If it does not work for you, please tap the &#128078; so I can check and fix it.">&#9888;&#65039; this link may not always open — please check</span>';
 return '';
 }
 function render(){
@@ -1209,6 +1235,7 @@ ${d.flag?'<div class="item-meta">'+flagBadge(d.flag)+'</div>':''}
 <div class="item-actions">
 <a class="btn btn-open" href="${d.link}" target="_blank" rel="noopener">Open &#8599;</a>
 ${alt}
+${voteBtns(d.link)}
 </div>
 </div>`;
 });
@@ -1243,6 +1270,7 @@ ${d.flag?flagBadge(d.flag):''}
 <a class="btn btn-open" href="${d.link}" target="_blank" rel="noopener">Open &#8599;</a>
 ${alt}
 <button class="btn btn-copy" onclick="copyLink('${d.link.replace(/'/g,"\\'")}',this)" title="Copy link">&#9741;</button>
+${voteBtns(d.link)}
 </div>
 </div>`;
 });
