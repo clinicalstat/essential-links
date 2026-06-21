@@ -1,6 +1,6 @@
 # Essential Links for Statistical Programmers
 
-**5,699 curated resources** across 20 sections — the most comprehensive free reference directory for clinical statistical programmers.
+**6,392 curated resources** across 20 sections — the most comprehensive free reference directory for clinical statistical programmers.
 
 🔗 **Live site:** [clinicalstat.github.io/essential-links](https://clinicalstat.github.io/essential-links/)
 
@@ -23,17 +23,17 @@ Built by a working programmer, not scraped from a textbook.
 | 5 | Regulatory & Submission | 353 |
 | 6 | Global Regulatory Agencies | 205 |
 | 7 | SAS Documentation | 357 |
-| 8 | Free Tools & Open Source | 1619 |
-| 9 | TFL Outputs & Visualization | 46 |
+| 8 | Free Tools & Open Source | 1722 |
+| 9 | TFL Outputs & Visualization | 173 |
 | 10 | Free Learning & Training | 895 |
-| 11 | Papers Conferences & Learning | 791 |
-| 12 | Therapeutic Area User Guides | 48 |
+| 11 | Papers Conferences & Learning | 949 |
+| 12 | Therapeutic Area User Guides | 205 |
 | 13 | Statistical Methods & Guidance | 202 |
 | 14 | eCTD & Submission Packaging | 56 |
 | 15 | Pharmacovigilance & Safety | 40 |
 | 16 | Real-World Data & Digital Health | 360 |
 | 17 | Biostatistics Software & Validation | 65 |
-| 18 | PK/PD & Pharmacometrics | 32 |
+| 18 | PK/PD & Pharmacometrics | 180 |
 | 19 | Data Privacy & Anonymization | 26 |
 | 20 | Clinical Operations & Project Mgmt | 44 |
 
@@ -68,7 +68,7 @@ Found a broken link? Missing a resource? Open an issue or PR.
 
 | Version | Date | Resources | Sections | Highlights |
 |---------|------|-----------|----------|------------|
-| 9.0 | Jun 2026 | 5,699 | 20 | **+1,414 new resources** added from a 17-domain research sweep (methodology & journals, R/SAS efficacy software, societies/conferences, free courses & MOOCs, free books/tutorials, datasets & repositories, GitHub orgs, regulatory/HTA guidance) — every URL curl-verified and deduped. New **live 👍/👎 feedback** on every card (shared counts via counterapi.dev, one correctable vote per link) plus `review_feedback.py` for quarterly review. Compact header, card favicons, "may not open" link flag. |
+| 9.0 | Jun 2026 | 6,392 | 20 | **Major research expansion: +4,063 new resources (2,329 → 6,392)** from 25+ parallel domain sweeps — methodology & journals, R/SAS/Python efficacy software, CRAN/Bioconductor packages, societies/conferences, free courses/MOOCs/books, **lexjansen + PharmaSUG/PHUSE/SGF papers**, datasets/repositories, GitHub orgs, regulatory/HTA/ICH guidance, therapeutic-area endpoints & COA/PRO, clinical graphics/TLF, PK/PD & pharmacometrics. Every URL curl-verified and deduplicated. New **live 👍/👎 feedback** on every card (shared counts via counterapi.dev, one correctable vote per link) + `review_feedback.py` for quarterly review. Compact header, card favicons, "may not open" link flag. |
 | 8.0 | Jun 2026 | 2,329 | 20 | Full link validation (real HTTP testing): 197 broken links repaired & verified, 0 broken remaining. **Replaced all 129 `wiki.cdisc.org` links** — the CDISC Confluence wiki now sits behind an Atlassian login wall, so every link pointed to public `cdisc.org` standard pages instead. Therapeutic Area section corrected to the 48 guides CDISC actually publishes (removed 48 non-existent TAUGs, added 7 missing real ones). Removed 49 duplicate entries. SEO/social meta, accessibility (aria-labels), and `<noscript>` fallback added. New `link_validation_report.html`. |
 | 7.0 | Apr 2026 | 2,419 | 20 | Link quality audit: 233 links verified/fixed, conservative fallbacks for unverifiable URLs |
 | 6.0 | Apr 2026 | 2,422 | 20 | 422 new free resources: 200+ learning entries, 110+ R/Python/CLI tools, expanded TFL/StatMethods/PV/RWD |
