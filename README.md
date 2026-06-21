@@ -44,7 +44,7 @@ Built by a working programmer, not scraped from a textbook.
 - **Mobile-first responsive design** — sticky search, section grid, back navigation
 - **Chatbot assistant** with intent-based matching across 45+ topics
 - **Dark/light mode** and **card/list view** toggles
-- **Primary + alternate links** — open wiki.cdisc.org links where available
+- **Primary + alternate links** — public CDISC standard pages and curated alternates
 - **Zero dependencies** — single HTML file, no build step
 
 ## Quick Start
@@ -68,7 +68,7 @@ Found a broken link? Missing a resource? Open an issue or PR.
 
 | Version | Date | Resources | Sections | Highlights |
 |---------|------|-----------|----------|------------|
-| 8.0 | Jun 2026 | 2,329 | 20 | Full link validation (real HTTP testing): 197 broken links repaired & verified, 0 broken remaining. Therapeutic Area section corrected to the 48 guides CDISC actually publishes (removed 48 non-existent TAUGs, added 7 missing real ones). Removed 49 duplicate entries. SEO/social meta, accessibility (aria-labels), and `<noscript>` fallback added. New `link_validation_report.html`. |
+| 8.0 | Jun 2026 | 2,329 | 20 | Full link validation (real HTTP testing): 197 broken links repaired & verified, 0 broken remaining. **Replaced all 129 `wiki.cdisc.org` links** — the CDISC Confluence wiki now sits behind an Atlassian login wall, so every link pointed to public `cdisc.org` standard pages instead. Therapeutic Area section corrected to the 48 guides CDISC actually publishes (removed 48 non-existent TAUGs, added 7 missing real ones). Removed 49 duplicate entries. SEO/social meta, accessibility (aria-labels), and `<noscript>` fallback added. New `link_validation_report.html`. |
 | 7.0 | Apr 2026 | 2,419 | 20 | Link quality audit: 233 links verified/fixed, conservative fallbacks for unverifiable URLs |
 | 6.0 | Apr 2026 | 2,422 | 20 | 422 new free resources: 200+ learning entries, 110+ R/Python/CLI tools, expanded TFL/StatMethods/PV/RWD |
 | 5.0 | Apr 2026 | 2,000 | 20 | SAS Docs, TFL & Viz, Free Learning sections; ADaM practical guidance |
