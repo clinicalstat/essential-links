@@ -7,3 +7,5 @@ taug_slugs.txt
 # link-audit working tooling
 browser_verify/
 *.txt
+__pycache__/
+new_links_report.html
