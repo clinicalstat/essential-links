@@ -542,6 +542,72 @@ font-style:italic;line-height:1.3;opacity:0.85
   .mobile-expand-toggle{display:none !important}
 }
 
+/* ============================================================
+   PREMIUM VISUAL POLISH (v8.1) — layered on top, non-breaking
+   ============================================================ */
+*{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{text-rendering:optimizeLegibility}
+::selection{background:rgba(20,184,166,0.28);color:inherit}
+html{scrollbar-width:thin;scrollbar-color:var(--sub2) transparent}
+*::-webkit-scrollbar{width:10px;height:10px}
+*::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;border:2px solid var(--bg)}
+*::-webkit-scrollbar-thumb:hover{background:var(--sub2)}
+:focus-visible{outline:2px solid var(--teal);outline-offset:2px;border-radius:8px}
+
+/* --- Hero: layered glow + subtle grid + sheen --- */
+.hero{background:linear-gradient(160deg,var(--navy) 0%,#13243d 55%,#0c1928 100%)}
+.hero::after{
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    radial-gradient(circle at 16% 18%,rgba(20,184,166,0.20),transparent 38%),
+    radial-gradient(circle at 86% 12%,rgba(99,102,241,0.18),transparent 44%),
+    linear-gradient(rgba(255,255,255,0.022) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,0.022) 1px,transparent 1px);
+  background-size:auto,auto,48px 48px,48px 48px;
+  -webkit-mask-image:radial-gradient(ellipse 78% 85% at 50% 28%,#000 38%,transparent 100%);
+          mask-image:radial-gradient(ellipse 78% 85% at 50% 28%,#000 38%,transparent 100%);
+}
+.hero-top,.hero h1,.hero-sub,.hero-author,.counters{position:relative;z-index:1}
+.hero h1{text-shadow:0 2px 36px rgba(20,184,166,0.18)}
+.hero h1 span{background:linear-gradient(120deg,#2DD4BF,#6366F1 58%,#818CF8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+/* --- Counters: gradient numbers + hairline dividers --- */
+.counters{gap:0}
+.counter{padding:0 1.7rem;position:relative}
+.counter+.counter::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:1px;height:26px;background:rgba(255,255,255,0.10)}
+.counter-num{background:linear-gradient(120deg,#ffffff,#9DECE4);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+@media(max-width:768px){.counter{padding:0 0.9rem}}
+
+/* --- Search: refined focus ring --- */
+.search-container{box-shadow:var(--search-shadow),0 0 0 1px var(--border)}
+.search-container:focus-within{border-color:transparent;box-shadow:var(--search-shadow),0 0 0 2px var(--teal),0 0 0 6px var(--teal-bg)}
+
+/* --- Cards: favicon + premium hover --- */
+.item-head{display:flex;align-items:center;gap:9px;margin-bottom:3px}
+.item-fav{width:18px;height:18px;border-radius:5px;flex-shrink:0;object-fit:contain;background:var(--bg2);box-shadow:0 0 0 1px var(--border)}
+.item-head .item-name{margin-bottom:0;min-width:0}
+.item{transition:transform .18s cubic-bezier(.2,.7,.3,1),box-shadow .18s,border-color .18s}
+.item::before{width:3px;background:linear-gradient(180deg,var(--teal),#6366F1)}
+.item::after{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(120deg,transparent 45%,rgba(20,184,166,0.06));opacity:0;transition:opacity .2s;pointer-events:none}
+.item:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.item:hover::after{opacity:1}
+
+/* --- Primary "Open" CTA --- */
+.btn-open{background:linear-gradient(135deg,var(--teal),#0c8f8f);color:#fff !important;box-shadow:0 2px 8px rgba(14,165,165,0.22)}
+.btn-open:hover{background:linear-gradient(135deg,#0fb3b3,#0a7d7d);box-shadow:0 5px 16px rgba(14,165,165,0.34);transform:translateY(-1px)}
+
+/* --- Category headers: glowing section dot --- */
+.cat-label{display:inline-flex;align-items:center;gap:7px}
+.cat-label::before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 8px currentColor;flex-shrink:0}
+
+/* --- Section tag sheen + glow fab --- */
+.item-sheet{box-shadow:inset 0 1px 0 rgba(255,255,255,0.22)}
+.chat-fab{animation:floaty 4.5s ease-in-out infinite}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.chat-fab:hover{animation:none}
+.mobile-section-card{transition:transform .15s,border-color .15s,background .15s}
+.mobile-section-card:hover{transform:translateY(-1px);border-color:var(--teal-border)}
+
 </style>
 </head>
 <body>
@@ -559,7 +625,7 @@ font-style:italic;line-height:1.3;opacity:0.85
 <div class="hero-badge">Open Source - Free Forever</div>
 <button class="theme-toggle" id="themeBtn" onclick="toggleTheme()" title="Toggle dark/light mode" aria-label="Toggle dark or light mode">&#9790;</button>
 </div>
-<h1>Essential <span>Links</span> for<br>Statistical Programmers</h1>
+<h1>Essential <span>Links</span> for <br>Statistical Programmers</h1>
 <p class="hero-sub">Search 2329 curated resources across CDISC, regulatory guidelines, tools, and more.</p>
 <p class="hero-author">Curated by <a href="https://www.linkedin.com/in/mohan-peddineni" target="_blank">Mohan Peddineni</a></p>
 <div class="counters">
@@ -1008,6 +1074,9 @@ setTimeout(()=>{toast.classList.remove('show');btn.classList.remove('copied');bt
 
 function toggleCat(key){collapsed[key]=(collapsed[key]===false)?true:false;render()}
 
+function favIco(url){
+try{var h=new URL(url).hostname;return '<img class="item-fav" loading="lazy" alt="" src="https://icons.duckduckgo.com/ip3/'+h+'.ico" onerror="this.style.visibility=\'hidden\'">';}catch(e){return '';}
+}
 function render(){
 const items=getFiltered();
 const uC=new Set(items.map(d=>d.category)),uS=new Set(items.map(d=>d.sheet));
@@ -1081,7 +1150,7 @@ const scol=COLORS[d.sheet]||'#64748B';
 const alt=d.altLink?`<a class="btn btn-alt" href="${d.altLink}" target="_blank" rel="noopener">Alt</a>`:'';
 h+=`<div class="item">
 <div class="item-body">
-<div class="item-name">${hl(d.resource)}</div>
+<div class="item-head">${favIco(d.link)}<div class="item-name">${hl(d.resource)}</div></div>
 <div class="item-desc">${hl(d.description)}</div>
 </div>
 <div class="item-actions">
@@ -1109,7 +1178,7 @@ const alt=d.altLink?`<a class="btn btn-alt" href="${d.altLink}" target="_blank" 
 const matchLabel=d._match&&d._match!=='name'&&d._match!=='fuzzy'?`<span class="item-match">${d._match.startsWith('smart')?'&#10024; '+d._match.slice(7):'matched in '+d._match}</span>`:'';
 h+=`<div class="item" style="animation:fadeIn 0.25s ${Math.min(i*0.02,0.2)}s both">
 <div class="item-body">
-<div class="item-name">${hl(d.resource)}</div>
+<div class="item-head">${favIco(d.link)}<div class="item-name">${hl(d.resource)}</div></div>
 <div class="item-desc">${hl(d.description)}</div>
 <div class="item-meta">
 <span class="item-sheet" style="background:${scol}">${SHORT[d.sheet]||d.sheet}</span>
