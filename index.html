@@ -658,9 +658,12 @@ html{scrollbar-width:thin;scrollbar-color:var(--sub2) transparent}
 
 /* --- like / dislike feedback buttons --- */
 .vote-group{display:inline-flex;gap:3px;align-items:center}
-.vote{width:27px;height:27px;border:none;border-radius:8px;background:var(--bg2);cursor:pointer;
-  font-size:0.76rem;line-height:1;display:inline-flex;align-items:center;justify-content:center;
-  padding:0;transition:all .15s;filter:grayscale(1);opacity:.6}
+.vote{min-width:27px;height:27px;border:none;border-radius:8px;background:var(--bg2);cursor:pointer;
+  font-size:0.76rem;line-height:1;display:inline-flex;align-items:center;justify-content:center;gap:3px;
+  padding:0 6px;transition:all .15s;filter:grayscale(1);opacity:.6}
+.vc{font-family:'Outfit',sans-serif;font-size:0.62rem;font-weight:700;filter:grayscale(1);color:var(--sub)}
+.vc:empty{display:none}
+.vote.on .vc,.vote:hover .vc{filter:grayscale(0)}
 .vote:hover{background:var(--border);filter:grayscale(0);opacity:1;transform:translateY(-1px)}
 .vote.on{filter:grayscale(0);opacity:1}
 .vote.on[data-val="1"]{background:var(--teal-bg);box-shadow:inset 0 0 0 1px var(--teal-border)}
@@ -1136,21 +1139,38 @@ function toggleCat(key){collapsed[key]=(collapsed[key]===false)?true:false;rende
 function favIco(url){
 try{var h=new URL(url).hostname;return '<img class="item-fav" loading="lazy" alt="" src="https://icons.duckduckgo.com/ip3/'+h+'.ico" onerror="this.style.visibility=\'hidden\'">';}catch(e){return '';}
 }
-/* ---- link feedback: like = works, dislike = broken (stored locally; optional central endpoint for quarterly review) ---- */
+/* ---- link feedback: like = works, dislike = broken. LIVE shared counts via counterapi.dev (no signup) + local vote memory ---- */
 var VOTES={};try{VOTES=JSON.parse(localStorage.getItem('el_votes')||'{}')}catch(e){VOTES={}}
-var FEEDBACK_ENDPOINT=''; // paste a Formspree / Google Apps Script URL here to collect votes centrally
+var CNTS={};try{CNTS=JSON.parse(localStorage.getItem('el_counts')||'{}')}catch(e){CNTS={}}
+var CB='https://api.counterapi.dev/v1/mp-essential-links/';
+var _loadBudget=140; // cap auto reads per page load to be gentle on the free counter service
 function showToast(msg){var t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.classList.add('show');clearTimeout(window._tt);window._tt=setTimeout(function(){t.classList.remove('show')},2000);}
-function sendFeedback(url,val){if(!FEEDBACK_ENDPOINT)return;try{fetch(FEEDBACK_ENDPOINT,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:url,vote:val>0?'works':'broken',ts:new Date().toISOString()})});}catch(e){}}
+function hashKey(u){var h=5381;for(var i=0;i<u.length;i++){h=((h*33)^u.charCodeAt(i))>>>0;}return h.toString(36);}
+function saveCounts(){try{localStorage.setItem('el_counts',JSON.stringify(CNTS))}catch(e){}}
+function apiCounter(key,action){return fetch(CB+key+'/'+(action||''),{cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(d){return d&&typeof d.count==='number'?d.count:null;}).catch(function(){return null;});}
+function paintCounts(k){var c=CNTS[k]||{};var l=c.l||0,d=c.d||0;
+document.querySelectorAll('.vote-group[data-k="'+k+'"]').forEach(function(g){var a=g.querySelector('.vc-up'),b=g.querySelector('.vc-down');if(a)a.textContent=l>0?l:'';if(b)b.textContent=d>0?d:'';});}
+function loadCounts(k){if(CNTS[k]&&CNTS[k]._f)return;if(_loadBudget<=0)return;_loadBudget--;CNTS[k]=CNTS[k]||{l:0,d:0};CNTS[k]._f=1;
+apiCounter('l'+k,'').then(function(c){if(c!=null){CNTS[k].l=c;saveCounts();paintCounts(k);}});
+apiCounter('d'+k,'').then(function(c){if(c!=null){CNTS[k].d=c;saveCounts();paintCounts(k);}});}
+var _voteObs=('IntersectionObserver' in window)?new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){var g=en.target;_voteObs.unobserve(g);var k=g.getAttribute('data-k');paintCounts(k);loadCounts(k);}});},{rootMargin:'160px'}):null;
+function observeVotes(){var gs=document.querySelectorAll('.vote-group');for(var i=0;i<gs.length;i++){var k=gs[i].getAttribute('data-k');paintCounts(k);if(_voteObs)_voteObs.observe(gs[i]);else loadCounts(k);}}
 function vote(btn){
-var url=btn.getAttribute('data-u');var val=parseInt(btn.getAttribute('data-val'),10);
-VOTES[url]=(VOTES[url]===val)?0:val;
-try{localStorage.setItem('el_votes',JSON.stringify(VOTES))}catch(e){}
-var bs=btn.parentNode.querySelectorAll('.vote');
-for(var i=0;i<bs.length;i++){var v=parseInt(bs[i].getAttribute('data-val'),10);if(VOTES[url]===v&&v!==0)bs[i].classList.add('on');else bs[i].classList.remove('on');}
-if(VOTES[url]!==0){sendFeedback(url,val);showToast(val>0?'Thanks! Marked as working \u2713':'Thanks \u2014 I\u2019ll review this link \u2713');}
+var url=btn.getAttribute('data-u');var val=parseInt(btn.getAttribute('data-val'),10);var k=hashKey(url);
+var prev=VOTES[url]||0;var next=(prev===val)?0:val;
+VOTES[url]=next;try{localStorage.setItem('el_votes',JSON.stringify(VOTES))}catch(e){}
+var grp=btn.parentNode;grp.querySelectorAll('.vote').forEach(function(b){var v=parseInt(b.getAttribute('data-val'),10);if(next===v&&v!==0)b.classList.add('on');else b.classList.remove('on');});
+CNTS[k]=CNTS[k]||{l:0,d:0};var ops=[];
+if(prev===1&&next!==1){CNTS[k].l=Math.max(0,CNTS[k].l-1);ops.push(['l','down']);}
+if(prev===-1&&next!==-1){CNTS[k].d=Math.max(0,CNTS[k].d-1);ops.push(['d','down']);}
+if(next===1&&prev!==1){CNTS[k].l=CNTS[k].l+1;ops.push(['l','up']);}
+if(next===-1&&prev!==-1){CNTS[k].d=CNTS[k].d+1;ops.push(['d','up']);}
+saveCounts();paintCounts(k);
+ops.forEach(function(o){apiCounter(o[0]+k,o[1]).then(function(c){if(c!=null){CNTS[k][o[0]]=c;saveCounts();paintCounts(k);}});});
+showToast(next===0?'Vote removed':(val>0?'Thanks! Marked as working \u2713':'Thanks \u2014 I\u2019ll review this \u2713'));
 }
-function voteBtns(u){var e=u.replace(/"/g,'&quot;');var up=VOTES[u]===1?' on':'';var dn=VOTES[u]===-1?' on':'';
-return '<span class="vote-group"><button class="vote'+up+'" data-u="'+e+'" data-val="1" onclick="vote(this)" title="This link works for me" aria-label="Mark link working">\u{1F44D}</button><button class="vote vd'+dn+'" data-u="'+e+'" data-val="-1" onclick="vote(this)" title="This link did not work" aria-label="Mark link broken">\u{1F44E}</button></span>';}
+function voteBtns(u){var e=u.replace(/"/g,'&quot;');var k=hashKey(u);var up=VOTES[u]===1?' on':'';var dn=VOTES[u]===-1?' on':'';
+return '<span class="vote-group" data-k="'+k+'"><button class="vote'+up+'" data-u="'+e+'" data-val="1" onclick="vote(this)" title="This link works for me" aria-label="Mark link working">\u{1F44D}<span class="vc vc-up"></span></button><button class="vote vd'+dn+'" data-u="'+e+'" data-val="-1" onclick="vote(this)" title="This link did not work" aria-label="Mark link broken">\u{1F44E}<span class="vc vc-down"></span></button></span>';}
 function flagBadge(f){
 if(f==='cf')return '<span class="item-flag" title="Heads up from me: I could not auto-confirm this one — a few sites occasionally show a verification page or load slowly. It usually opens fine in a normal browser. If it does not work for you, please tap the &#128078; so I can check and fix it.">&#9888;&#65039; this link may not always open — please check</span>';
 return '';
@@ -1280,6 +1300,7 @@ h+=`</div>`;
 }
 });
 el.innerHTML=h;
+observeVotes();
 }
 
 // CHATBOT — Intent-based matching engine v2
