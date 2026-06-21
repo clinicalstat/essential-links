@@ -1,6 +1,6 @@
 # Essential Links for Statistical Programmers
 
-**2,419 curated resources** across 20 sections — the most comprehensive free reference directory for clinical statistical programmers.
+**2,378 curated resources** across 20 sections — the most comprehensive free reference directory for clinical statistical programmers.
 
 🔗 **Live site:** [clinicalstat.github.io/essential-links](https://clinicalstat.github.io/essential-links/)
 
@@ -27,7 +27,7 @@ Built by a working programmer, not scraped from a textbook.
 | 9 | TFL Outputs & Visualization | 46 |
 | 10 | Free Learning & Training | 385 |
 | 11 | Papers Conferences & Learning | 91 |
-| 12 | Therapeutic Area User Guides | 89 |
+| 12 | Therapeutic Area User Guides | 48 |
 | 13 | Statistical Methods & Guidance | 75 |
 | 14 | eCTD & Submission Packaging | 59 |
 | 15 | Pharmacovigilance & Safety | 43 |
@@ -58,7 +58,7 @@ Or visit [clinicalstat.github.io/essential-links](https://clinicalstat.github.io
 
 ## Excel Version
 
-`Essential_Links_For_Statistical_Programmers.xlsx` — same 2,419 entries with 20 data sheets, hyperlinks, auto-filters, and category headers.
+`Essential_Links_For_Statistical_Programmers.xlsx` — 20 data sheets with hyperlinks, auto-filters, and category headers. (Note: the Excel file still reflects the pre-v8.0 set of 2,419 entries and has not yet been re-synced with the v8.0 link audit.)
 
 ## Contributing
 
@@ -68,6 +68,7 @@ Found a broken link? Missing a resource? Open an issue or PR.
 
 | Version | Date | Resources | Sections | Highlights |
 |---------|------|-----------|----------|------------|
+| 8.0 | Jun 2026 | 2,378 | 20 | Full link validation (real HTTP testing): 197 broken links repaired & verified, 0 broken remaining. Therapeutic Area section corrected to the 48 guides CDISC actually publishes (removed 48 non-existent TAUGs, added 7 missing real ones). Added `link_validation_report.html`. |
 | 7.0 | Apr 2026 | 2,419 | 20 | Link quality audit: 233 links verified/fixed, conservative fallbacks for unverifiable URLs |
 | 6.0 | Apr 2026 | 2,422 | 20 | 422 new free resources: 200+ learning entries, 110+ R/Python/CLI tools, expanded TFL/StatMethods/PV/RWD |
 | 5.0 | Apr 2026 | 2,000 | 20 | SAS Docs, TFL & Viz, Free Learning sections; ADaM practical guidance |
