@@ -9,3 +9,7 @@ browser_verify/
 *.txt
 __pycache__/
 new_links_report.html
+
+# agent temp scripts
+_*.sh
+*.sh
