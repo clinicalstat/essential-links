@@ -13,3 +13,4 @@ new_links_report.html
 # agent temp scripts
 _*.sh
 *.sh
+_*
