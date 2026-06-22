@@ -1,6 +1,6 @@
 # Essential Links for Statistical Programmers
 
-**4,133 curated resources** across 20 sections — the most comprehensive free reference directory for clinical statistical programmers.
+**4,133 curated resources** across 20 sections - the most comprehensive free reference directory for clinical statistical programmers.
 
 🔗 **Live site:** [clinicalstat.github.io/essential-links](https://clinicalstat.github.io/essential-links/)
 
@@ -8,7 +8,7 @@
 
 ## What This Is
 
-A single-page reference tool that brings together every free resource clinical statistical programmers actually use — CDISC standards, regulatory guidance, SAS documentation, R/Python packages, free courses, practice datasets, submission templates, ICH guidelines, and more — in one searchable, filterable interface.
+A single-page reference tool that brings together every free resource clinical statistical programmers actually use - CDISC standards, regulatory guidance, SAS documentation, R/Python packages, free courses, practice datasets, submission templates, ICH guidelines, and more - in one searchable, filterable interface.
 
 Built by a working programmer, not scraped from a textbook.
 
@@ -40,12 +40,12 @@ Built by a working programmer, not scraped from a textbook.
 ## Features
 
 - **Smart search** with 60+ synonym groups
-- **Parent-child section grouping** — 8 parent categories organize 20 sections
-- **Mobile-first responsive design** — sticky search, section grid, back navigation
+- **Parent-child section grouping** - 8 parent categories organize 20 sections
+- **Mobile-first responsive design** - sticky search, section grid, back navigation
 - **Chatbot assistant** with intent-based matching across 45+ topics
 - **Dark/light mode** and **card/list view** toggles
-- **Primary + alternate links** — public CDISC standard pages and curated alternates
-- **Zero dependencies** — single HTML file, no build step
+- **Primary + alternate links** - public CDISC standard pages and curated alternates
+- **Zero dependencies** - single HTML file, no build step
 
 ## Quick Start
 
@@ -58,7 +58,7 @@ Or visit [clinicalstat.github.io/essential-links](https://clinicalstat.github.io
 
 ## Excel Version
 
-`Essential_Links_For_Statistical_Programmers.xlsx` — 20 data sheets with hyperlinks, auto-filters, and category headers. (Note: the Excel file still reflects the pre-v8.0 set of 2,419 entries and has not yet been re-synced with the v8.0 link audit.)
+`Essential_Links_For_Statistical_Programmers.xlsx` - 20 data sheets with hyperlinks, auto-filters, and category headers. (Note: the Excel file still reflects the pre-v8.0 set of 2,419 entries and has not yet been re-synced with the v8.0 link audit.)
 
 ## Contributing
 
@@ -68,8 +68,8 @@ Found a broken link? Missing a resource? Open an issue or PR.
 
 | Version | Date | Resources | Sections | Highlights |
 |---------|------|-----------|----------|------------|
-| 9.0 | Jun 2026 | 4,133 | 20 | **Curated expansion to 4,133** (from the 2,329 v8.0 core). After a large research sweep, every link was **browser content-verified** (real page render + PDF-download + redirect/soft-404 detection); only additions that are relevant *by construction* were kept — CRAN/Bioconductor/PyPI packages and verified lexjansen conference PDFs — while ~1,900 relevance-risky auto-generated deep links (specific titles bouncing to generic landing pages) were dropped. Added live 👍/👎 feedback (counterapi.dev, one correctable vote/link) + `review_feedback.py`; compact header, favicons, "may not open" flag. |
-| 8.0 | Jun 2026 | 2,329 | 20 | Full link validation (real HTTP testing): 197 broken links repaired & verified, 0 broken remaining. **Replaced all 129 `wiki.cdisc.org` links** — the CDISC Confluence wiki now sits behind an Atlassian login wall, so every link pointed to public `cdisc.org` standard pages instead. Therapeutic Area section corrected to the 48 guides CDISC actually publishes (removed 48 non-existent TAUGs, added 7 missing real ones). Removed 49 duplicate entries. SEO/social meta, accessibility (aria-labels), and `<noscript>` fallback added. New `link_validation_report.html`. |
+| 9.0 | Jun 2026 | 4,133 | 20 | **Curated expansion to 4,133** (from the 2,329 v8.0 core). After a large research sweep, every link was **browser content-verified** (real page render + PDF-download + redirect/soft-404 detection); only additions that are relevant *by construction* were kept - CRAN/Bioconductor/PyPI packages and verified lexjansen conference PDFs - while ~1,900 relevance-risky auto-generated deep links (specific titles bouncing to generic landing pages) were dropped. Added live 👍/👎 feedback (counterapi.dev, one correctable vote/link) + `review_feedback.py`; compact header, favicons, "may not open" flag. |
+| 8.0 | Jun 2026 | 2,329 | 20 | Full link validation (real HTTP testing): 197 broken links repaired & verified, 0 broken remaining. **Replaced all 129 `wiki.cdisc.org` links** - the CDISC Confluence wiki now sits behind an Atlassian login wall, so every link pointed to public `cdisc.org` standard pages instead. Therapeutic Area section corrected to the 48 guides CDISC actually publishes (removed 48 non-existent TAUGs, added 7 missing real ones). Removed 49 duplicate entries. SEO/social meta, accessibility (aria-labels), and `<noscript>` fallback added. New `link_validation_report.html`. |
 | 7.0 | Apr 2026 | 2,419 | 20 | Link quality audit: 233 links verified/fixed, conservative fallbacks for unverifiable URLs |
 | 6.0 | Apr 2026 | 2,422 | 20 | 422 new free resources: 200+ learning entries, 110+ R/Python/CLI tools, expanded TFL/StatMethods/PV/RWD |
 | 5.0 | Apr 2026 | 2,000 | 20 | SAS Docs, TFL & Viz, Free Learning sections; ADaM practical guidance |
