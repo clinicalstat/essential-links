@@ -144,8 +144,8 @@ cursor:pointer;color:var(--sub);display:flex;align-items:center;justify-content:
 }
 .vt-btn.on{background:var(--card);color:var(--text);box-shadow:var(--shadow-sm)}
 
-.filter-group{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-bottom:2px}
-.filter-group-label{font-family:'Outfit',sans-serif;font-size:0.6rem;font-weight:700;color:var(--sub2);text-transform:uppercase;letter-spacing:0.06em;width:100%;padding:8px 0 2px}
+.filter-group{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-bottom:5px}
+.filter-group-label{font-family:'Outfit',sans-serif;font-size:0.58rem;font-weight:700;color:var(--sub2);text-transform:uppercase;letter-spacing:0.05em;align-self:center;margin-right:3px;white-space:nowrap;flex-shrink:0}
 .filter-group:first-child .filter-group-label{padding-top:0}
 .mob-group-header{font-family:'Outfit',sans-serif;font-size:0.7rem;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:0.05em;padding:12px 0 5px;border-bottom:1px solid var(--border);margin-bottom:6px}
 .mob-group-header:first-child{padding-top:4px}
@@ -221,13 +221,15 @@ transition:all 0.15s;line-height:1
 .section-btn-caret{font-size:0.6rem;color:var(--sub2);margin-left:-2px}
 .section-btn.active .section-btn-caret{color:var(--teal)}
 .section-panel{width:100%;margin:2px 0 8px;animation:fadeIn 0.2s ease}
+.show-more{display:block;width:100%;margin-top:8px;padding:8px;border:1px dashed var(--border);background:transparent;color:var(--teal);font-family:'Outfit',sans-serif;font-weight:600;font-size:0.74rem;border-radius:8px;cursor:pointer;transition:all 0.15s}
+.show-more:hover{border-color:var(--teal);background:var(--teal-bg)}
 
 .grid{display:grid;grid-template-columns:1fr;gap:6px}
 
 .item{
-background:var(--card);border-radius:12px;padding:14px 16px;
+background:var(--card);border-radius:10px;padding:10px 12px;
 border:1px solid var(--border);
-display:flex;justify-content:space-between;align-items:flex-start;gap:12px;
+display:flex;justify-content:space-between;align-items:flex-start;gap:10px;
 transition:all 0.2s;position:relative;overflow:hidden
 }
 .item::before{content:'';position:absolute;left:0;top:0;width:3px;height:100%;background:var(--teal);opacity:0;transition:opacity 0.15s}
@@ -235,8 +237,8 @@ transition:all 0.2s;position:relative;overflow:hidden
 .item:hover::before{opacity:1}
 
 .item-body{flex:1;min-width:0}
-.item-name{font-family:'Outfit',sans-serif;font-weight:700;font-size:0.92rem;color:var(--text);margin-bottom:2px}
-.item-desc{font-size:0.8rem;color:var(--sub);line-height:1.45}
+.item-name{font-family:'Outfit',sans-serif;font-weight:700;font-size:0.84rem;color:var(--text);margin-bottom:2px;line-height:1.25}
+.item-desc{font-size:0.74rem;color:var(--sub);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .item-meta{display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap}
 .item-sheet{font-size:0.62rem;font-family:'Outfit',sans-serif;font-weight:600;padding:2px 8px;border-radius:100px;color:#fff;letter-spacing:0.02em}
 .item-match{font-size:0.62rem;color:var(--teal);font-family:'Outfit',sans-serif;font-weight:500;background:var(--teal-bg);padding:1px 8px;border-radius:4px}
@@ -1186,6 +1188,8 @@ setTimeout(()=>{toast.classList.remove('show');btn.classList.remove('copied');bt
 }
 
 function toggleCat(key){collapsed[key]=(collapsed[key]===false)?true:false;render()}
+const PAGE=24;let pageShown={};
+function showMore(key){pageShown[key]=(pageShown[key]||PAGE)+PAGE;render()}
 
 function favIco(url){
 try{var h=new URL(url).hostname;return '<img class="item-fav" loading="lazy" alt="" src="https://icons.duckduckgo.com/ip3/'+h+'.ico" onerror="this.style.visibility=\'hidden\'">';}catch(e){return '';}
@@ -1322,8 +1326,9 @@ h+=`<button class="section-btn${isColl?'':' active'}" onclick="toggleCat('${k.re
 <span class="section-btn-caret">${isColl?'&#9656;':'&#9662;'}</span>
 </button>`;
 if(!isColl){
+const lim=pageShown[k]||PAGE;
 h+=`<div class="section-panel"><div class="${viewMode==='list'?'grid list':'grid'}">`;
-g.items.forEach((d,i)=>{
+g.items.slice(0,lim).forEach((d,i)=>{
 const scol=COLORS[d.sheet]||'#64748B';
 const alt=d.altLink?`<a class="btn btn-alt" href="${d.altLink}" target="_blank" rel="noopener">Alt</a>`:'';
 const matchLabel=d._match&&d._match!=='name'&&d._match!=='fuzzy'?`<span class="item-match">${d._match.startsWith('smart')?'&#10024; '+d._match.slice(7):'matched in '+d._match}</span>`:'';
@@ -1345,7 +1350,9 @@ ${voteBtns(d.link)}
 </div>
 </div>`;
 });
-h+=`</div></div>`;
+h+=`</div>`;
+if(g.items.length>lim){const more=Math.min(PAGE,g.items.length-lim);h+=`<button class="show-more" onclick="showMore('${k.replace(/'/g,"\\'")}')">Show ${more} more &#183; ${g.items.length-lim} remaining</button>`;}
+h+=`</div>`;
 }
 }
 });
