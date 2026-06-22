@@ -59,7 +59,7 @@ animation:drift 25s ease-in-out infinite alternate;pointer-events:none
 }
 @keyframes drift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(20px,-15px) scale(1.02)}}
 
-.hero-top{display:flex;justify-content:space-between;align-items:center;max-width:1140px;margin:0 auto 1.5rem;position:relative}
+.hero-top{display:flex;justify-content:space-between;align-items:center;max-width:1500px;margin:0 auto 1.5rem;position:relative}
 .hero-badge{
 display:inline-flex;align-items:center;gap:6px;
 background:rgba(14,165,165,0.12);border:1px solid rgba(14,165,165,0.25);
@@ -131,7 +131,7 @@ color:var(--teal);cursor:pointer;transition:all 0.15s
 .ai-chip:hover{background:var(--teal-bg)}
 
 .toolbar{
-max-width:1140px;margin:1.2rem auto 0;padding:0 1.5rem;
+max-width:1500px;margin:1.2rem auto 0;padding:0 1.5rem;
 display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px
 }
 .stats{display:flex;gap:1.2rem;align-items:center;flex-wrap:wrap}
@@ -171,7 +171,7 @@ cursor:pointer;color:var(--sub);display:flex;align-items:center;justify-content:
   color:var(--sub2);background:var(--bg2);padding:2px 8px;border-radius:100px;
 }
 
-.filter-section{max-width:1140px;margin:0.8rem auto 0;padding:0 1.5rem}
+.filter-section{max-width:1500px;margin:0.8rem auto 0;padding:0 1.5rem}
 .filter-row{display:flex;flex-direction:column;gap:0;padding-bottom:4px}
 .filter-row>.ft{align-self:flex-start;margin-bottom:6px}
 .filter-row::-webkit-scrollbar{display:none}
@@ -195,7 +195,7 @@ color:var(--sub);cursor:pointer;transition:all 0.15s;white-space:nowrap
 .sf:hover{border-color:var(--teal);color:var(--teal)}
 .sf.on{background:var(--teal-bg);color:var(--teal);border-color:var(--teal-border)}
 
-.main{max-width:1140px;margin:1.2rem auto 3rem;padding:0 1.5rem}
+.main{max-width:1500px;margin:1.2rem auto 3rem;padding:0 1.5rem}
 
 .cat-section{margin-bottom:0.5rem}
 .cat-header{display:flex;align-items:center;gap:10px;padding:10px 0 6px;cursor:pointer;user-select:none}
@@ -283,6 +283,8 @@ font-size:0.78rem;color:var(--sub);line-height:1.8;transition:border-color 0.3s
 .grid{grid-template-columns:repeat(2,1fr)}
 .list{grid-template-columns:1fr}
 }
+@media(min-width:1180px){.grid{grid-template-columns:repeat(3,1fr)}.list{grid-template-columns:1fr}}
+@media(min-width:1500px){.grid{grid-template-columns:repeat(4,1fr)}.list{grid-template-columns:1fr}}
 @media(max-width:640px){
 .hero{padding:2rem 1.25rem 3.5rem}
 .hero h1{font-size:1.75rem}
