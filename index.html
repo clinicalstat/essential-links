@@ -223,6 +223,39 @@ transition:all 0.15s;line-height:1
 .section-panel{width:100%;margin:2px 0 8px;animation:fadeIn 0.2s ease}
 .show-more{display:block;width:100%;margin-top:8px;padding:8px;border:1px dashed var(--border);background:transparent;color:var(--teal);font-family:'Outfit',sans-serif;font-weight:600;font-size:0.74rem;border-radius:8px;cursor:pointer;transition:all 0.15s}
 .show-more:hover{border-color:var(--teal);background:var(--teal-bg)}
+.breadcrumb{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin:0 0 1.1rem}
+.bc{background:none;border:none;cursor:pointer;font-family:'Outfit',sans-serif;font-size:0.82rem;font-weight:600;color:var(--teal);padding:4px 9px;border-radius:7px;transition:background 0.15s}
+.bc:hover{background:var(--teal-bg)}
+.bc-cur{color:var(--text);cursor:default;font-weight:700}
+.bc-cur:hover{background:none}
+.bc-sep{color:var(--sub2);font-size:0.85rem}
+.drill-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.drill-card{display:flex;align-items:center;gap:10px;text-align:left;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 15px;cursor:pointer;transition:all 0.15s;width:100%;font-family:'Outfit',sans-serif}
+.drill-card:hover{border-color:var(--teal);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.drill-ico{font-size:1.15rem;flex-shrink:0;line-height:1}
+.drill-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.drill-name{flex:1;min-width:0;font-size:0.85rem;font-weight:600;color:var(--text);line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.drill-cnt{font-size:0.68rem;font-weight:700;color:var(--sub);background:var(--bg2);padding:2px 9px;border-radius:100px;flex-shrink:0}
+.drill-arrow{color:var(--sub2);font-size:1.05rem;flex-shrink:0}
+.miller{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-items:start}
+.miller-mobile{grid-template-columns:1fr}
+.mcol{border:1px solid var(--border);border-radius:12px;background:var(--card);display:flex;flex-direction:column;max-height:72vh;overflow:hidden}
+.miller-mobile .mcol{max-height:none}
+.mcol-head{padding:7px 11px;font-family:'Outfit',sans-serif;font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--sub2);border-bottom:1px solid var(--border);flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mcol-body{overflow-y:auto;padding:4px;display:flex;flex-direction:column;gap:1px}
+.mcol-body::-webkit-scrollbar{width:5px}
+.mcol-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.mrow{display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;cursor:pointer;background:none;border:none;width:100%;text-align:left;font-family:'Outfit',sans-serif;font-size:0.76rem;color:var(--text);transition:background 0.12s;text-decoration:none;line-height:1.25}
+.mrow:hover{background:var(--bg2)}
+.mrow.active{background:var(--teal-bg);color:var(--teal);font-weight:600}
+.mrow-ico{flex-shrink:0;font-size:0.95rem}
+.mrow-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.mrow-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mrow-cnt{font-size:0.64rem;font-weight:700;color:var(--sub);background:var(--bg2);padding:1px 7px;border-radius:100px;flex-shrink:0}
+.mrow.active .mrow-cnt{background:rgba(14,165,165,0.15);color:var(--teal)}
+.mrow-link .mrow-name{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.mrow-open{color:var(--sub2);flex-shrink:0;font-size:0.82rem}
+.mcol-empty{padding:18px 12px;text-align:center;color:var(--sub2);font-size:0.72rem;line-height:1.5}
 
 .grid{display:grid;grid-template-columns:1fr;gap:6px}
 
@@ -1230,134 +1263,94 @@ function flagBadge(f){
 if(f==='cf')return '<span class="item-flag" title="Heads up from me: I could not auto-confirm this one - a few sites occasionally show a verification page or load slowly. It usually opens fine in a normal browser. If it does not work for you, please tap the &#128078; so I can check and fix it.">&#9888;&#65039; this link may not always open - please check</span>';
 return '';
 }
+let navGroup=null,navSection=null,navCategory=null;
+
+function navTo(level,value){
+if(level==='home'){navGroup=null;navSection=null;navCategory=null;}
+else if(level==='group'){navGroup=(navGroup===value?null:value);navSection=null;navCategory=null;}
+else if(level==='section'){navSection=(navSection===value?null:value);navCategory=null;}
+else if(level==='category'){navCategory=(navCategory===value?null:value);}
+pageShown={};
+var si=document.getElementById('search');
+if(si&&searchTerm){si.value='';searchTerm='';searchExpanded=[];var cb=document.getElementById('clearBtn');if(cb)cb.classList.remove('vis');var as=document.getElementById('aiSug');if(as)as.classList.remove('show');}
+render();
+}
+
+function bcrumb(){
+var c='<nav class="breadcrumb">';
+c+=`<button class="bc${(!navGroup&&!searchTerm)?' bc-cur':''}" onclick="navTo('home')">&#127968; Home</button>`;
+if(searchTerm){c+=`<span class="bc-sep">&#8250;</span><span class="bc bc-cur">Search: "${chatEsc(searchTerm)}"</span>`;return c+'</nav>';}
+if(navGroup){c+=`<span class="bc-sep">&#8250;</span><button class="bc${!navSection?' bc-cur':''}" data-v="${chatEsc(navGroup)}" onclick="navTo('group',this.dataset.v)">${chatEsc(navGroup)}</button>`;}
+if(navSection){c+=`<span class="bc-sep">&#8250;</span><button class="bc${!navCategory?' bc-cur':''}" data-v="${chatEsc(navSection)}" onclick="navTo('section',this.dataset.v)">${chatEsc(SHORT[navSection]||navSection)}</button>`;}
+if(navCategory){c+=`<span class="bc-sep">&#8250;</span><span class="bc bc-cur">${chatEsc(navCategory)}</span>`;}
+return c+'</nav>';
+}
+
+function mcol(title,rows,level,emptyMsg){
+var body='<div class="mcol-body">';
+if(rows===null){body+=`<div class="mcol-empty">${emptyMsg}</div>`;}
+else if(!rows.length){body+='<div class="mcol-empty">Nothing here</div>';}
+else{rows.forEach(function(r){
+if(r.leaf){body+=`<a class="mrow mrow-link" href="${r.href}" target="_blank" rel="noopener" title="${chatEsc(r.desc||'')}"><span class="mrow-name">${chatEsc(r.name)}</span><span class="mrow-open">&#8599;</span></a>`;}
+else{var ic=r.icon?`<span class="mrow-ico">${r.icon}</span>`:'';var dt=r.dot?`<span class="mrow-dot" style="background:${r.dot}"></span>`:'';
+body+=`<button class="mrow${r.active?' active':''}" data-v="${chatEsc(r.v)}" onclick="navTo('${level}',this.dataset.v)">${ic}${dt}<span class="mrow-name">${chatEsc(r.name)}</span><span class="mrow-cnt">${r.cnt}</span></button>`;}
+});}
+body+='</div>';
+return `<div class="mcol"><div class="mcol-head">${title}</div>${body}</div>`;
+}
+
+function colGroups(){return GROUPS.map(function(g){return {v:g.name,name:g.name,icon:g.icon,cnt:DATA.filter(function(d){return g.sections.indexOf(d.sheet)>-1;}).length,active:navGroup===g.name};});}
+function colSections(){var g=GROUPS.find(function(x){return x.name===navGroup;});return (g?g.sections:[]).filter(function(s){return DATA.some(function(d){return d.sheet===s;});}).map(function(s){return {v:s,name:SHORT[s]||s,dot:COLORS[s]||'#64748B',cnt:DATA.filter(function(d){return d.sheet===s;}).length,active:navSection===s};});}
+function colCategories(){var cats={};DATA.forEach(function(d){if(d.sheet===navSection)cats[d.category]=(cats[d.category]||0)+1;});return Object.keys(cats).sort().map(function(c){return {v:c,name:c,dot:COLORS[navSection]||'#64748B',cnt:cats[c],active:navCategory===c};});}
+function colLinks(){return DATA.filter(function(d){return d.sheet===navSection&&d.category===navCategory;}).map(function(d){return {leaf:true,href:d.link,name:d.resource,desc:d.description};});}
+
+function renderMiller(){
+var c1=mcol('Groups',colGroups(),'group','');
+var c2=navGroup?mcol('Sections',colSections(),'section',''):mcol('Sections',null,'section','Pick a group ←');
+var c3=navSection?mcol('Categories',colCategories(),'category',''):mcol('Categories',null,'category','Pick a section');
+var c4=navCategory?mcol('Links',colLinks(),'link',''):mcol('Links',null,'link','Pick a category');
+return `<div class="miller">${c1}${c2}${c3}${c4}</div>`;
+}
+
+function renderMobile(){
+var col;
+if(navCategory)col=mcol(chatEsc(navCategory),colLinks(),'link','');
+else if(navSection)col=mcol('Categories',colCategories(),'category','');
+else if(navGroup)col=mcol('Sections',colSections(),'section','');
+else col=mcol('Groups',colGroups(),'group','');
+return bcrumb()+`<div class="miller miller-mobile">${col}</div>`;
+}
+
+function itemCard(d,i){
+var scol=COLORS[d.sheet]||'#64748B';
+var alt=d.altLink?`<a class="btn btn-alt" href="${d.altLink}" target="_blank" rel="noopener">Alt</a>`:'';
+var matchLabel=d._match&&d._match!=='name'&&d._match!=='fuzzy'?`<span class="item-match">${d._match.startsWith('smart')?'&#10024; '+d._match.slice(7):'matched in '+d._match}</span>`:'';
+return `<div class="item" style="animation:fadeIn 0.25s ${Math.min(i*0.02,0.2)}s both"><div class="item-body"><div class="item-head">${favIco(d.link)}<div class="item-name">${hl(d.resource)}</div></div><div class="item-desc">${hl(d.description)}</div><div class="item-meta"><span class="item-sheet" style="background:${scol}">${SHORT[d.sheet]||d.sheet}</span>${matchLabel}${d.flag?flagBadge(d.flag):''}</div></div><div class="item-actions"><a class="btn btn-open" href="${d.link}" target="_blank" rel="noopener">Open &#8599;</a>${alt}<button class="btn btn-copy" onclick="copyLink('${d.link.replace(/'/g,"\\'")}',this)" title="Copy link">&#9741;</button>${voteBtns(d.link)}</div></div>`;
+}
+
+function drillList(items,key){
+var lim=pageShown[key]||PAGE;
+var h=`<div class="${viewMode==='list'?'grid list':'grid'}">`;
+items.slice(0,lim).forEach(function(d,i){h+=itemCard(d,i);});
+h+='</div>';
+if(items.length>lim){var more=Math.min(PAGE,items.length-lim);h+=`<button class="show-more" onclick="showMore('${key}')">Show ${more} more &#183; ${items.length-lim} remaining</button>`;}
+return h;
+}
+
 function render(){
-const items=getFiltered();
-const uC=new Set(items.map(d=>d.category)),uS=new Set(items.map(d=>d.sheet));
-const matchType=searchTerm&&items.length>0&&items[0]._match&&items[0]._match.startsWith('smart')?'Smart match':'';
-document.getElementById('statsBar').innerHTML=`
-<span class="stat"><b>${items.length}</b> resources</span>
-<span class="stat"><b>${uS.size}</b> sections</span>
-<span class="stat"><b>${uC.size}</b> categories</span>
-${matchType?`<span class="stat" style="color:var(--teal)">${matchType}</span>`:''}
-${searchTerm?`<span class="stat" style="color:var(--sub2)">for "${searchTerm}"</span>`:''}
-`;
-const el=document.getElementById('content');
-if(!items.length){
-el.innerHTML=`<div class="empty"><div style="font-size:3rem;opacity:0.2;margin-bottom:8px">&#128269;</div><h3>No results found</h3><p>Try a different keyword, a synonym, or clear the filters.</p></div>`;
-return;
+var el=document.getElementById('content');
+var fsec=document.querySelector('.filter-section');if(fsec)fsec.style.display='none';
+var vt=document.querySelector('.view-toggle');if(vt)vt.style.display='none';
+var sb=document.getElementById('statsBar');
+if(searchTerm){
+var items=getFiltered();
+if(sb)sb.innerHTML=`<span class="stat"><b>${items.length}</b> results</span>`;
+if(vt)vt.style.display='flex';
+el.innerHTML=bcrumb()+(items.length?drillList(items,'_search'):`<div class="empty"><div style="font-size:3rem;opacity:0.2;margin-bottom:8px">&#128269;</div><h3>No results found</h3><p>Try a different keyword, or click Home to browse.</p></div>`);
+observeVotes();return;
 }
-
-// Mobile: if "All" view and no search, show grouped section cards
-const isMobile=window.innerWidth<=768;
-if(isMobile && !activeSheet && !searchTerm){
-let sh='';
-GROUPS.forEach(g=>{
-sh+=`<div class="mob-group-header">${g.icon} ${g.name}</div>`;
-sh+=`<div class="mobile-section-grid">`;
-g.sections.forEach(s=>{
-const cnt=DATA.filter(d=>d.sheet===s).length;
-const col=COLORS[s]||'#64748B';
-const short=SHORT[s]||s;
-sh+=`<div class="mobile-section-card" onclick="document.getElementById('sectionFilterSelect').value='${s.replace(/'/g,"\\'")}';selectSectionFilter('${s.replace(/'/g,"\\'")}')">
-<span class="mobile-section-dot" style="background:${col}"></span>
-<span class="mobile-section-name">${short}</span>
-<span class="mobile-section-cnt">${cnt}</span>
-</div>`;
-});
-sh+=`</div>`;
-});
-el.innerHTML=`<div style="padding:0.5rem 0">${sh}</div>`;
-return;
-}
-
-const grp={};const order=[];
-items.forEach(d=>{
-const k=d.sheet+'|||'+d.category;
-if(!grp[k]){grp[k]={sheet:d.sheet,cat:d.category,items:[]};order.push(k);}
-grp[k].items.push(d);
-});
-
-let h='';
-const isMob=window.innerWidth<=768;
-
-// Mobile: show section header with back button when inside a section
-if(isMob && activeSheet){
-const col=COLORS[activeSheet]||'#64748B';
-h+=`<div class="mob-section-header">
-<button class="mob-back-btn" onclick="document.getElementById('sectionFilterSelect').value='all';selectSectionFilter('all')">&#8592; All Sections</button>
-<span class="mob-section-title" style="color:${col}">${activeSheet}</span>
-<span class="mob-section-total">${items.length} resources</span>
-</div>`;
-}
-
-if(!isMob)h+=`<div class="section-grid">`;
-order.forEach(k=>{
-const g=grp[k];const col=COLORS[g.sheet]||'#64748B';
-
-if(isMob){
-// Mobile: flat list with thin category label (no accordion)
-// Paginate: show max 50 items per category group to keep mobile fast
-h+=`<div class="mob-cat-label" style="color:${col}">${hl(g.cat)} <span style="opacity:0.5;font-weight:500">(${g.items.length})</span></div>`;
-h+=`<div class="grid">`;
-g.items.forEach((d,i)=>{
-const scol=COLORS[d.sheet]||'#64748B';
-const alt=d.altLink?`<a class="btn btn-alt" href="${d.altLink}" target="_blank" rel="noopener">Alt</a>`:'';
-h+=`<div class="item">
-<div class="item-body">
-<div class="item-head">${favIco(d.link)}<div class="item-name">${hl(d.resource)}</div></div>
-<div class="item-desc">${hl(d.description)}</div>
-${d.flag?'<div class="item-meta">'+flagBadge(d.flag)+'</div>':''}
-</div>
-<div class="item-actions">
-<a class="btn btn-open" href="${d.link}" target="_blank" rel="noopener">Open &#8599;</a>
-${alt}
-${voteBtns(d.link)}
-</div>
-</div>`;
-});
-h+=`</div>`;
-} else {
-// Desktop: section button in a wrap grid; open ones inject a full-width panel right below
-const isColl=searchTerm?false:(collapsed[k]===undefined||collapsed[k]===true);
-h+=`<button class="section-btn${isColl?'':' active'}" onclick="toggleCat('${k.replace(/'/g,"\\'")}')">
-<span class="section-dot" style="background:${col}"></span>
-<span class="section-btn-name">${hl(g.cat)}</span>
-<span class="section-btn-cnt" style="background:${col}1a;color:${col}">${g.items.length}</span>
-<span class="section-btn-caret">${isColl?'&#9656;':'&#9662;'}</span>
-</button>`;
-if(!isColl){
-const lim=pageShown[k]||PAGE;
-h+=`<div class="section-panel"><div class="${viewMode==='list'?'grid list':'grid'}">`;
-g.items.slice(0,lim).forEach((d,i)=>{
-const scol=COLORS[d.sheet]||'#64748B';
-const alt=d.altLink?`<a class="btn btn-alt" href="${d.altLink}" target="_blank" rel="noopener">Alt</a>`:'';
-const matchLabel=d._match&&d._match!=='name'&&d._match!=='fuzzy'?`<span class="item-match">${d._match.startsWith('smart')?'&#10024; '+d._match.slice(7):'matched in '+d._match}</span>`:'';
-h+=`<div class="item" style="animation:fadeIn 0.25s ${Math.min(i*0.02,0.2)}s both">
-<div class="item-body">
-<div class="item-head">${favIco(d.link)}<div class="item-name">${hl(d.resource)}</div></div>
-<div class="item-desc">${hl(d.description)}</div>
-<div class="item-meta">
-<span class="item-sheet" style="background:${scol}">${SHORT[d.sheet]||d.sheet}</span>
-${matchLabel}
-${d.flag?flagBadge(d.flag):''}
-</div>
-</div>
-<div class="item-actions">
-<a class="btn btn-open" href="${d.link}" target="_blank" rel="noopener">Open &#8599;</a>
-${alt}
-<button class="btn btn-copy" onclick="copyLink('${d.link.replace(/'/g,"\\'")}',this)" title="Copy link">&#9741;</button>
-${voteBtns(d.link)}
-</div>
-</div>`;
-});
-h+=`</div>`;
-if(g.items.length>lim){const more=Math.min(PAGE,g.items.length-lim);h+=`<button class="show-more" onclick="showMore('${k.replace(/'/g,"\\'")}')">Show ${more} more &#183; ${g.items.length-lim} remaining</button>`;}
-h+=`</div>`;
-}
-}
-});
-if(!isMob)h+=`</div>`;
-el.innerHTML=h;
+if(sb)sb.innerHTML='';
+el.innerHTML=(window.innerWidth<=768)?renderMobile():renderMiller();
 observeVotes();
 }
 
