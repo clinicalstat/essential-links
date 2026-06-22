@@ -205,6 +205,23 @@ color:var(--sub);cursor:pointer;transition:all 0.15s;white-space:nowrap
 .cat-toggle{color:var(--sub2);font-size:0.75rem;transition:transform 0.2s;width:20px;text-align:center}
 .cat-toggle.collapsed{transform:rotate(-90deg)}
 
+/* Section buttons: compact, fill width; clicking opens a full-width panel right below */
+.section-grid{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;margin-top:0.4rem}
+.section-btn{
+display:inline-flex;align-items:center;gap:8px;
+background:var(--card);border:1px solid var(--border);border-radius:10px;
+padding:9px 13px;cursor:pointer;font-family:'Outfit',sans-serif;
+font-size:0.74rem;font-weight:700;letter-spacing:0.03em;color:var(--text);
+transition:all 0.15s;line-height:1
+}
+.section-btn:hover{border-color:var(--teal-border);box-shadow:var(--shadow-sm);transform:translateY(-1px)}
+.section-btn.active{border-color:var(--teal);background:var(--teal-bg);color:var(--teal)}
+.section-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.section-btn-cnt{font-size:0.64rem;padding:1px 7px;border-radius:100px;font-weight:700}
+.section-btn-caret{font-size:0.6rem;color:var(--sub2);margin-left:-2px}
+.section-btn.active .section-btn-caret{color:var(--teal)}
+.section-panel{width:100%;margin:2px 0 8px;animation:fadeIn 0.2s ease}
+
 .grid{display:grid;grid-template-columns:1fr;gap:6px}
 
 .item{
@@ -1269,6 +1286,7 @@ h+=`<div class="mob-section-header">
 </div>`;
 }
 
+if(!isMob)h+=`<div class="section-grid">`;
 order.forEach(k=>{
 const g=grp[k];const col=COLORS[g.sheet]||'#64748B';
 
@@ -1295,17 +1313,16 @@ ${voteBtns(d.link)}
 });
 h+=`</div>`;
 } else {
-// Desktop: accordion with expand/collapse (unchanged)
+// Desktop: section button in a wrap grid; open ones inject a full-width panel right below
 const isColl=searchTerm?false:(collapsed[k]===undefined||collapsed[k]===true);
-h+=`<div class="cat-section">
-<div class="cat-header" onclick="toggleCat('${k.replace(/'/g,"\\'")}')">
-<span class="cat-label" style="color:${col}">${hl(g.cat)}</span>
-<span class="cat-count" style="background:${col}15;color:${col}">${g.items.length}</span>
-<span class="cat-line"></span>
-<span class="cat-toggle ${isColl?'collapsed':''}">&#9660;</span>
-</div>`;
+h+=`<button class="section-btn${isColl?'':' active'}" onclick="toggleCat('${k.replace(/'/g,"\\'")}')">
+<span class="section-dot" style="background:${col}"></span>
+<span class="section-btn-name">${hl(g.cat)}</span>
+<span class="section-btn-cnt" style="background:${col}1a;color:${col}">${g.items.length}</span>
+<span class="section-btn-caret">${isColl?'&#9656;':'&#9662;'}</span>
+</button>`;
 if(!isColl){
-h+=`<div class="${viewMode==='list'?'grid list':'grid'}">`;
+h+=`<div class="section-panel"><div class="${viewMode==='list'?'grid list':'grid'}">`;
 g.items.forEach((d,i)=>{
 const scol=COLORS[d.sheet]||'#64748B';
 const alt=d.altLink?`<a class="btn btn-alt" href="${d.altLink}" target="_blank" rel="noopener">Alt</a>`:'';
@@ -1328,11 +1345,11 @@ ${voteBtns(d.link)}
 </div>
 </div>`;
 });
-h+=`</div>`;
+h+=`</div></div>`;
 }
-h+=`</div>`;
 }
 });
+if(!isMob)h+=`</div>`;
 el.innerHTML=h;
 observeVotes();
 }
