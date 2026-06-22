@@ -1,0 +1,7 @@
+name = "essential-links-ai"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+# Workers AI binding (free daily allowance). Gives the Worker `env.AI`.
+[ai]
+binding = "AI"
