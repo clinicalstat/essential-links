@@ -2,6 +2,6 @@ name = "essential-links-ai"
 main = "worker.js"
 compatibility_date = "2024-11-01"
 
-# Workers AI binding (free daily allowance). Gives the Worker `env.AI`.
-[ai]
-binding = "AI"
+# This Worker only relays to the free Gemini API. It does NOT use any paid
+# Cloudflare add-on. The Gemini API key is stored as a secret, not here:
+#   wrangler secret put GEMINI_KEY

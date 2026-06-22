@@ -1,10 +1,14 @@
 // Cloudflare Worker: conversational backend for the Essential Links chatbot.
 //
-// The browser retrieves the most relevant resources from the directory and
-// posts them here with the user's question. This Worker asks a free
-// Workers AI model to write a short answer grounded ONLY in those resources,
-// so it can recommend real links and never invent URLs. The API/model runs
-// server-side at Cloudflare's edge, so there is no key to expose in the page.
+// Uses Google Gemini's FREE tier (no credit card; the free tier returns errors
+// when limits are hit and never bills). This Worker only RELAYS the request and
+// keeps your Gemini API key as a server-side secret, so the key is never exposed
+// in the static page. The Worker itself runs on Cloudflare's free Workers plan,
+// which also does not bill unless you explicitly enable paid usage.
+//
+// The browser retrieves the most relevant resources from the directory and posts
+// them here with the user's question. Gemini writes a short answer grounded ONLY
+// in those resources, so it recommends real links and never invents URLs.
 //
 // Deploy: see README.md in this folder.
 
@@ -13,9 +17,8 @@ const ALLOW_ORIGINS = [
   // add 'http://localhost:8000' etc. while testing locally
 ];
 
-// Model: a capable instruct model on the Workers AI free allowance.
-// Swap for another Workers AI text model if you prefer.
-const MODEL = '@cf/meta/llama-3.1-8b-instruct';
+// Free-tier Gemini model. Change if you prefer another free model.
+const MODEL = 'gemini-2.0-flash';
 
 function corsHeaders(origin) {
   const allowed = ALLOW_ORIGINS.includes(origin) ? origin : ALLOW_ORIGINS[0];
@@ -44,6 +47,9 @@ export default {
     if (request.method !== 'POST') {
       return json({ error: 'POST only' }, 405, origin);
     }
+    if (!env.GEMINI_KEY) {
+      return json({ error: 'missing GEMINI_KEY secret' }, 500, origin);
+    }
 
     let body;
     try {
@@ -71,17 +77,30 @@ export default {
 
     const user = `Question: ${q}\n\nCandidate resources:\n${list || '(none found)'}`;
 
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${env.GEMINI_KEY}`;
+
     let answer = '';
     try {
-      const out = await env.AI.run(MODEL, {
-        messages: [
-          { role: 'system', content: system },
-          { role: 'user', content: user }
-        ],
-        max_tokens: 300,
-        temperature: 0.3
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 12000);
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: ctrl.signal,
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: system }] },
+          contents: [{ role: 'user', parts: [{ text: user }] }],
+          generationConfig: { maxOutputTokens: 300, temperature: 0.3 }
+        })
       });
-      answer = String((out && (out.response || out.result || '')) || '').trim();
+      clearTimeout(timer);
+      if (!res.ok) {
+        // 429 = free-tier limit reached; the site falls back to the rule-based bot
+        return json({ error: 'gemini_status_' + res.status }, 502, origin);
+      }
+      const data = await res.json();
+      const parts = data?.candidates?.[0]?.content?.parts || [];
+      answer = parts.map(p => p.text || '').join('').trim();
     } catch (e) {
       return json({ error: 'ai_unavailable' }, 502, origin);
     }
