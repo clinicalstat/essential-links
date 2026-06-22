@@ -815,7 +815,6 @@ const SYNONYMS={
 'define':['define.xml','define-xml','metadata','crt-dds'],
 'define.xml':['define','define-xml','metadata','crt-dds'],
 'validate':['validation','pinnacle','p21','conformance','checks','rules'],
-'validation':['validate','pinnacle','p21','conformance'],
 'pinnacle':['p21','validate','validation','conformance'],
 'p21':['pinnacle','validate','validation','conformance'],
 'sdtm':['study data tabulation','sdtmig','tabulation','domains'],
@@ -857,7 +856,35 @@ const SYNONYMS={
 'loinc':['lab','laboratory','observation'],
 'endpoint':['primary','secondary','efficacy','analysis'],
 'taug':['therapeutic area','user guide','disease specific'],
-'sponsor':['pharmaceutical','pharma','company','industry']
+'sponsor':['pharmaceutical','pharma','company','industry'],
+'tfl':['tlf','table','listing','figure','output','display'],
+'listing':['tlf','tfl','table','figure','output'],
+'figure':['tlf','plot','graph','graphic','chart','visualization'],
+'graph':['figure','plot','graphic','chart','visualization','tlf'],
+'graphic':['figure','plot','graph','chart','visualization','ggplot'],
+'plot':['figure','graph','graphic','chart','ggplot','forest'],
+'visualization':['figure','plot','graph','tlf','dashboard'],
+'sap':['statistical analysis plan','analysis plan','statistical plan'],
+'csr':['clinical study report','study report'],
+'macro':['sas macro','utility','automation'],
+'shiny':['dashboard','app','teal','interactive'],
+'dashboard':['shiny','app','teal','interactive','visualization'],
+'survival':['kaplan meier','time to event','cox','adtte','log-rank','tte'],
+'kaplan meier':['survival','time to event','cox','log-rank'],
+'km':['kaplan meier','survival','time to event'],
+'mmrm':['mixed model','repeated measures','longitudinal'],
+'imputation':['missing data','multiple imputation','locf'],
+'missing data':['imputation','locf','mmrm'],
+'qc':['quality control','validation','double programming','review'],
+'randomization':['random','allocation','ixrs','iwrs','stratification'],
+'sample size':['power','power analysis','sample size calculation'],
+'power':['sample size','power analysis'],
+'biomarker':['genomics','omics','pharmacogenomics','translational'],
+'genomics':['omics','biomarker','sequencing','ngs'],
+'subgroup':['forest plot','interaction','stratified'],
+'interim':['dmc','dsmb','interim analysis','group sequential'],
+'bayesian':['mcmc','prior','posterior','stan'],
+'spec':['specification','metadata','template']
 };
 
 const INTENTS={
@@ -1766,6 +1793,9 @@ function rankChat(query){
       if(hit) hitTokens++;
     });
     if(score===0) return;
+    // exact / prefix title match should win
+    if(e.res===phrase) score+=20;
+    else if(phrase.length>3 && e.res.startsWith(phrase)) score+=10;
     // phrase bonus: whole query appears verbatim
     if(phrase.length>3 && (e.res.includes(phrase)||e.desc.includes(phrase))) score+=8;
     // coverage bonus: matched most of the user's words
