@@ -1,0 +1,16 @@
+*.py
+*.json
+*.log
+*.output
+taug_slugs.txt
+
+# link-audit working tooling
+browser_verify/
+*.txt
+__pycache__/
+new_links_report.html
+
+# agent temp scripts
+_*.sh
+*.sh
+_*
