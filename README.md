@@ -1,6 +1,6 @@
 # Essential Links for Statistical Programmers
 
-**6,377 curated resources** across 20 sections — the most comprehensive free reference directory for clinical statistical programmers.
+**6,054 curated resources** across 20 sections — the most comprehensive free reference directory for clinical statistical programmers.
 
 🔗 **Live site:** [clinicalstat.github.io/essential-links](https://clinicalstat.github.io/essential-links/)
 
@@ -68,7 +68,7 @@ Found a broken link? Missing a resource? Open an issue or PR.
 
 | Version | Date | Resources | Sections | Highlights |
 |---------|------|-----------|----------|------------|
-| 9.0 | Jun 2026 | 6,377 | 20 | **Major research expansion: +4,063 new resources (2,329 → 6,377)** from 25+ parallel domain sweeps — methodology & journals, R/SAS/Python efficacy software, CRAN/Bioconductor packages, societies/conferences, free courses/MOOCs/books, **lexjansen + PharmaSUG/PHUSE/SGF papers**, datasets/repositories, GitHub orgs, regulatory/HTA/ICH guidance, therapeutic-area endpoints & COA/PRO, clinical graphics/TLF, PK/PD & pharmacometrics. Every URL curl-verified and deduplicated. New **live 👍/👎 feedback** on every card (shared counts via counterapi.dev, one correctable vote per link) + `review_feedback.py` for quarterly review. Compact header, card favicons, "may not open" link flag. |
+| 9.0 | Jun 2026 | 6,054 | 20 | **Major research expansion: +4,063 new resources (2,329 → 6,054)** from 25+ parallel domain sweeps — methodology & journals, R/SAS/Python efficacy software, CRAN/Bioconductor packages, societies/conferences, free courses/MOOCs/books, **lexjansen + PharmaSUG/PHUSE/SGF papers**, datasets/repositories, GitHub orgs, regulatory/HTA/ICH guidance, therapeutic-area endpoints & COA/PRO, clinical graphics/TLF, PK/PD & pharmacometrics. Every URL curl-verified and deduplicated. New **live 👍/👎 feedback** on every card (shared counts via counterapi.dev, one correctable vote per link) + `review_feedback.py` for quarterly review. Compact header, card favicons, "may not open" link flag. |
 | 8.0 | Jun 2026 | 2,329 | 20 | Full link validation (real HTTP testing): 197 broken links repaired & verified, 0 broken remaining. **Replaced all 129 `wiki.cdisc.org` links** — the CDISC Confluence wiki now sits behind an Atlassian login wall, so every link pointed to public `cdisc.org` standard pages instead. Therapeutic Area section corrected to the 48 guides CDISC actually publishes (removed 48 non-existent TAUGs, added 7 missing real ones). Removed 49 duplicate entries. SEO/social meta, accessibility (aria-labels), and `<noscript>` fallback added. New `link_validation_report.html`. |
 | 7.0 | Apr 2026 | 2,419 | 20 | Link quality audit: 233 links verified/fixed, conservative fallbacks for unverifiable URLs |
 | 6.0 | Apr 2026 | 2,422 | 20 | 422 new free resources: 200+ learning entries, 110+ R/Python/CLI tools, expanded TFL/StatMethods/PV/RWD |
