@@ -1892,11 +1892,10 @@ document.getElementById('chatInput').value=text;
 sendChat();
 }
 
-// Optional AI backend. Leave '' to use the built-in rule-based finder only.
-// To enable conversational answers, deploy ai-worker/ to Cloudflare and paste
-// its URL here (see ai-worker/README.md). If the endpoint is empty or fails,
-// the chat automatically falls back to the rule-based finder below.
-const AI_ENDPOINT='';
+// Optional AI backend (Val.town relay -> Gemini). Leave '' to use the built-in
+// rule-based finder only. If the endpoint is empty or fails, the chat
+// automatically falls back to the rule-based finder below. See AI-SETUP.md.
+const AI_ENDPOINT='https://clinicalstat--433bdd746df111f1bbf21607ee4eb77e.web.val.run';
 
 function sendChat(){
 const inp=document.getElementById('chatInput');
