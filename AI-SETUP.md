@@ -1,61 +1,46 @@
-# Turn on the AI chatbot (free, no terminal, no credit card)
+# AI chatbot backend (how it's set up)
 
-The chatbot works today as a rule-based link finder. This optional step makes it
-write full conversational answers, using **Google Gemini's free tier**. Nothing
-here can charge you: the Gemini free tier needs no card and just returns an error
-when limits are hit, and the Vercel free plan needs no card. If a limit is ever
-reached, the chat quietly falls back to the rule-based finder.
+The chatbot has two modes:
 
-Everything below is done in your **web browser** - no terminal, no installs.
+- **Rule-based finder** (always on) - matches your question against the directory
+  and returns the best links. Works with no backend.
+- **Conversational answers** (optional) - a small relay calls a free AI model to
+  write a short answer that recommends the matched links by name.
 
-## Step 1 - Get a free Gemini key (2 min)
+The conversational layer is **currently enabled** via a free
+[Val.town](https://val.town) HTTP function that relays to Google Gemini's free
+tier. There is **no billing**: the Gemini free tier and Val.town free plan both
+need no credit card, and if a limit is ever hit the chat silently falls back to
+the rule-based finder.
 
-1. Go to https://aistudio.google.com/apikey
-2. Sign in with your Google account and click **Create API key**.
-3. Copy the key (looks like `AIza...`). Keep it handy for Step 2.
+## How it's wired
 
-*(No credit card. This key stays private - you paste it into Vercel's settings,
-never into the website code.)*
+- **Frontend:** `index.html` has `const AI_ENDPOINT='https://...web.val.run'`.
+  The browser finds the most relevant resources with the built-in ranker, posts
+  the question + those resources to the endpoint, and shows the returned answer
+  above the matched cards. Any error or empty answer -> automatic fallback to the
+  rule-based finder.
+- **Relay:** a Val.town HTTP val (owner `clinicalstat`, name `essentiallinksai`).
+  It holds the API key as a private environment variable (`GEMINI_KEY`), builds a
+  grounded prompt from the posted resources, calls Gemini, and returns
+  `{ "answer": "..." }`. CORS is locked to `https://clinicalstat.github.io`.
+- **Model:** `gemini-2.5-flash-lite` (free-tier eligible). Note: `gemini-2.0-flash`
+  returned `limit: 0` for this project/region, so `2.5-flash-lite` is used instead.
 
-## Step 2 - Deploy the relay on Vercel (5 min)
+## Maintenance
 
-The relay is the small piece that holds your key privately and forwards questions
-to Gemini, so the key is never visible in the public site.
+- **Change the model:** edit line 2 of the val's `main.ts`
+  (`const MODEL = "..."`). `gemini-2.5-flash` is a higher-quality free option.
+- **Rotate the key:** Val.town -> the val -> Env vars -> update `GEMINI_KEY`.
+- **Turn the AI off:** set `AI_ENDPOINT=''` in `index.html`. The chat reverts to
+  the rule-based finder; nothing else breaks.
+- **If you hit 429s under heavy traffic:** the free tier has per-minute/day
+  limits. The chat just falls back when they're hit; for a durable fix you can
+  switch the relay to another free provider (e.g. Groq) or link billing.
 
-1. Go to https://vercel.com and click **Sign Up** - choose **Continue with
-   GitHub** (free, no card).
-2. Click **Add New... -> Project**.
-3. Find **essential-links** in the list and click **Import**.
-4. Before clicking Deploy, open the **Environment Variables** section and add:
-   - **Name:** `GEMINI_KEY`
-   - **Value:** paste the key from Step 1
-   Click **Add**.
-5. Click **Deploy** and wait for it to finish.
-6. Vercel shows your site URL, like `https://essential-links-xxxx.vercel.app`.
-   Your chatbot endpoint is that URL with `/api/chat` on the end:
-   ```
-   https://essential-links-xxxx.vercel.app/api/chat
-   ```
+## The val's code
 
-## Step 3 - Send me that endpoint
-
-Paste the `.../api/chat` URL back to me and I'll switch the live chatbot on
-(I set `AI_ENDPOINT` in `index.html` and push). You can also do it yourself:
-search for `AI_ENDPOINT` in `index.html` and set it to that URL.
-
-That's it. The chatbot will then answer in full sentences and still recommend the
-real links from the directory.
-
----
-
-### Notes
-- **Which site stays live?** Your main site is still GitHub Pages
-  (clinicalstat.github.io). Vercel is only used for the `/api/chat` endpoint -
-  you can ignore the copy of the site Vercel also hosts.
-- **Privacy:** only the user's question and already-public resource titles are
-  sent to Gemini. No personal data is collected.
-- **Turn it off:** set `AI_ENDPOINT=''` in `index.html`, or delete the project in
-  Vercel. The chat reverts to the rule-based finder.
-- **Allowed site:** `api/chat.js` only answers requests from
-  `https://clinicalstat.github.io`. If your site moves, update `ALLOW_ORIGINS`
-  in that file.
+The Val.town function source lives in the val itself
+(`https://www.val.town/x/clinicalstat/essentiallinksai`). It accepts
+`POST { q, items }` and returns `{ answer }`, relaying to Gemini with the key
+read from `Deno.env.get("GEMINI_KEY")`.
