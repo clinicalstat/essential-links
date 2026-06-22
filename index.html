@@ -243,6 +243,7 @@ transition:all 0.15s;line-height:1
 .miller-mobile .mcol{height:auto;max-height:72vh}
 .mcol-head{padding:7px 11px;font-family:'Outfit',sans-serif;font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--sub2);border-bottom:1px solid var(--border);flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mcol-body{flex:1;min-height:0;overflow-y:auto;padding:4px;display:flex;flex-direction:column;gap:1px}
+.mcol-links{padding:6px;gap:6px}
 .mcol-body::-webkit-scrollbar{width:5px}
 .mcol-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
 .mrow{display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:7px;cursor:pointer;background:none;border:none;width:100%;text-align:left;font-family:'Outfit',sans-serif;font-size:0.76rem;color:var(--text);transition:background 0.12s;text-decoration:none;line-height:1.25}
@@ -1307,19 +1308,23 @@ return `<div class="mcol"><div class="mcol-head">${title}</div>${body}</div>`;
 function colGroups(){return GROUPS.map(function(g){return {v:g.name,name:g.name,icon:g.icon,cnt:DATA.filter(function(d){return g.sections.indexOf(d.sheet)>-1;}).length,active:navGroup===g.name};});}
 function colSections(){var g=GROUPS.find(function(x){return x.name===navGroup;});return (g?g.sections:[]).filter(function(s){return DATA.some(function(d){return d.sheet===s;});}).map(function(s){return {v:s,name:SHORT[s]||s,dot:COLORS[s]||'#64748B',cnt:DATA.filter(function(d){return d.sheet===s;}).length,active:navSection===s};});}
 function colCategories(){var cats={};DATA.forEach(function(d){if(d.sheet===navSection)cats[d.category]=(cats[d.category]||0)+1;});return Object.keys(cats).sort().map(function(c){return {v:c,name:c,dot:COLORS[navSection]||'#64748B',cnt:cats[c],active:navCategory===c};});}
-function colLinks(){return DATA.filter(function(d){return d.sheet===navSection&&d.category===navCategory;}).map(function(d){return {leaf:true,href:d.link,name:d.resource,desc:d.description};});}
+function linksColumn(title){
+var its=DATA.filter(function(d){return d.sheet===navSection&&d.category===navCategory;});
+var inner='<div class="mcol-body mcol-links">'+(its.length?its.map(function(d,i){return itemCard(d,i);}).join(''):'<div class="mcol-empty">Nothing here</div>')+'</div>';
+return `<div class="mcol"><div class="mcol-head">${title}</div>${inner}</div>`;
+}
 
 function renderMiller(){
 var c1=mcol('Groups',colGroups(),'group','');
 var c2=navGroup?mcol('Sections',colSections(),'section',''):mcol('Sections',null,'section','Pick a group ←');
 var c3=navSection?mcol('Categories',colCategories(),'category',''):mcol('Categories',null,'category','Pick a section');
-var c4=navCategory?mcol('Links',colLinks(),'link',''):mcol('Links',null,'link','Pick a category');
+var c4=navCategory?linksColumn('Links'):mcol('Links',null,'link','Pick a category');
 return `<div class="miller">${c1}${c2}${c3}${c4}</div>`;
 }
 
 function renderMobile(){
 var col;
-if(navCategory)col=mcol(chatEsc(navCategory),colLinks(),'link','');
+if(navCategory)col=linksColumn(chatEsc(navCategory));
 else if(navSection)col=mcol('Categories',colCategories(),'category','');
 else if(navGroup)col=mcol('Sections',colSections(),'section','');
 else col=mcol('Groups',colGroups(),'group','');
