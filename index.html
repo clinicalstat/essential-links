@@ -354,6 +354,8 @@ background:var(--teal-bg);color:var(--teal);padding:4px 10px;border-radius:6px;
 text-decoration:none !important;white-space:nowrap;flex-shrink:0
 }
 .chat-card a:hover{background:rgba(14,165,165,0.18)}
+.chat-seeall{margin-top:6px;width:100%;border:1px solid var(--teal-border);background:var(--teal-bg);color:var(--teal);font-family:'Outfit',sans-serif;font-size:0.72rem;font-weight:600;padding:7px 10px;border-radius:8px;cursor:pointer;transition:background 0.15s}
+.chat-seeall:hover{background:rgba(14,165,165,0.18)}
 
 .typing{display:flex;gap:4px;padding:10px 14px;align-self:flex-start}
 .typing span{width:7px;height:7px;border-radius:50%;background:var(--sub2);animation:typeDot 1.2s infinite}
@@ -813,7 +815,6 @@ const SYNONYMS={
 'define':['define.xml','define-xml','metadata','crt-dds'],
 'define.xml':['define','define-xml','metadata','crt-dds'],
 'validate':['validation','pinnacle','p21','conformance','checks','rules'],
-'validation':['validate','pinnacle','p21','conformance'],
 'pinnacle':['p21','validate','validation','conformance'],
 'p21':['pinnacle','validate','validation','conformance'],
 'sdtm':['study data tabulation','sdtmig','tabulation','domains'],
@@ -855,7 +856,35 @@ const SYNONYMS={
 'loinc':['lab','laboratory','observation'],
 'endpoint':['primary','secondary','efficacy','analysis'],
 'taug':['therapeutic area','user guide','disease specific'],
-'sponsor':['pharmaceutical','pharma','company','industry']
+'sponsor':['pharmaceutical','pharma','company','industry'],
+'tfl':['tlf','table','listing','figure','output','display'],
+'listing':['tlf','tfl','table','figure','output'],
+'figure':['tlf','plot','graph','graphic','chart','visualization'],
+'graph':['figure','plot','graphic','chart','visualization','tlf'],
+'graphic':['figure','plot','graph','chart','visualization','ggplot'],
+'plot':['figure','graph','graphic','chart','ggplot','forest'],
+'visualization':['figure','plot','graph','tlf','dashboard'],
+'sap':['statistical analysis plan','analysis plan','statistical plan'],
+'csr':['clinical study report','study report'],
+'macro':['sas macro','utility','automation'],
+'shiny':['dashboard','app','teal','interactive'],
+'dashboard':['shiny','app','teal','interactive','visualization'],
+'survival':['kaplan meier','time to event','cox','adtte','log-rank','tte'],
+'kaplan meier':['survival','time to event','cox','log-rank'],
+'km':['kaplan meier','survival','time to event'],
+'mmrm':['mixed model','repeated measures','longitudinal'],
+'imputation':['missing data','multiple imputation','locf'],
+'missing data':['imputation','locf','mmrm'],
+'qc':['quality control','validation','double programming','review'],
+'randomization':['random','allocation','ixrs','iwrs','stratification'],
+'sample size':['power','power analysis','sample size calculation'],
+'power':['sample size','power analysis'],
+'biomarker':['genomics','omics','pharmacogenomics','translational'],
+'genomics':['omics','biomarker','sequencing','ngs'],
+'subgroup':['forest plot','interaction','stratified'],
+'interim':['dmc','dsmb','interim analysis','group sequential'],
+'bayesian':['mcmc','prior','posterior','stan'],
+'spec':['specification','metadata','template']
 };
 
 const INTENTS={
@@ -1664,141 +1693,187 @@ const CHAT_INTENTS = [
  results:[]}
 ];
 
-function processChat(query){
-  const q = query.toLowerCase().replace(/[?!.,;:'"]/g,' ').replace(/\s+/g,' ').trim();
+// ===== Chatbot search engine (client-side, unified ranking) =====
+const CHAT_STOP = new Set(['the','a','an','of','to','for','in','on','and','or','me','my','i','do','you','can','could','what','whats','which','where','show','find','need','want','need','looking','look','how','is','are','was','with','about','please','give','get','some','any','that','this','these','those','help','tell','there','best','good','use','using','used']);
 
-  // 1. Score each intent by trigger match quality
-  let scored = [];
-  CHAT_INTENTS.forEach((intent,idx) => {
-    let bestScore = 0;
-    intent.triggers.forEach(trig => {
-      if(q.includes(trig)){
-        // Longer trigger = better match; exact = bonus
-        let s = trig.length * 2 + intent.priority;
-        if(q === trig) s += 50;
-        bestScore = Math.max(bestScore, s);
-      }
+// Light stemmer: collapse common plurals/suffixes so "packages" == "package"
+function chatStem(w){
+  if(w.length > 4){
+    if(w.endsWith('ies')) return w.slice(0,-3)+'y';
+    if(w.endsWith('sses')) return w.slice(0,-2);
+    if(w.endsWith('ses')) return w.slice(0,-2);
+    if(w.endsWith('s') && !w.endsWith('ss')) return w.slice(0,-1);
+  }
+  return w;
+}
+
+function chatTokenize(q){
+  return q.toLowerCase()
+    .replace(/[^a-z0-9 .+-]/g,' ').replace(/\s+/g,' ').trim()
+    .split(' ')
+    .filter(w => w && w.length>1 && !CHAT_STOP.has(w))
+    .map(chatStem);
+}
+
+// Bounded edit distance (early-exits once it exceeds max)
+function chatEdit(a,b,max){
+  const m=a.length,n=b.length;
+  if(Math.abs(m-n) > max) return max+1;
+  let prev=new Array(n+1);
+  for(let j=0;j<=n;j++) prev[j]=j;
+  for(let i=1;i<=m;i++){
+    let cur=new Array(n+1); cur[0]=i; let best=i;
+    for(let j=1;j<=n;j++){
+      const cost = a[i-1]===b[j-1] ? 0 : 1;
+      cur[j]=Math.min(prev[j]+1, cur[j-1]+1, prev[j-1]+cost);
+      if(cur[j]<best) best=cur[j];
+    }
+    if(best>max) return max+1;
+    prev=cur;
+  }
+  return prev[n];
+}
+
+// Lazily-built index: per-entry haystacks + a vocabulary for typo correction
+let CHAT_INDEX=null, CHAT_VOCAB=null;
+function buildChatIndex(){
+  if(CHAT_INDEX) return;
+  CHAT_INDEX = DATA.map(d => ({
+    d,
+    res:(d.resource||'').toLowerCase(),
+    cat:(d.category||'').toLowerCase(),
+    desc:(d.description||'').toLowerCase(),
+    sheet:(d.sheet||'').toLowerCase()
+  }));
+  CHAT_VOCAB = new Set();
+  CHAT_INDEX.forEach(e => {
+    (e.res+' '+e.cat+' '+e.sheet).split(/[^a-z0-9]+/).forEach(t => {
+      if(t.length >= 4) CHAT_VOCAB.add(chatStem(t));
     });
-    // Also check if ALL words in a trigger appear in the query (unordered)
-    if(bestScore === 0){
-      intent.triggers.forEach(trig => {
-        const tw = trig.split(' ');
-        if(tw.length > 1 && tw.every(w => q.includes(w))){
-          let s = trig.length + intent.priority * 0.7;
-          bestScore = Math.max(bestScore, s);
-        }
+  });
+}
+
+// Correct an unknown token to the nearest in-vocabulary term
+function chatCorrect(tok){
+  if(tok.length < 4 || CHAT_VOCAB.has(tok)) return tok;
+  const maxD = tok.length > 6 ? 2 : 1;
+  let best=tok, bestD=maxD+1;
+  CHAT_VOCAB.forEach(v => {
+    if(Math.abs(v.length-tok.length) > maxD) return;
+    const d=chatEdit(tok,v,maxD);
+    if(d<bestD){ bestD=d; best=v; }
+  });
+  return bestD<=maxD ? best : tok;
+}
+
+// Unified ranker: typo-correct + synonym-expand the query, score every entry
+function rankChat(query){
+  buildChatIndex();
+  const phrase = query.toLowerCase().replace(/\s+/g,' ').trim();
+  let tokens = chatTokenize(query).map(chatCorrect);
+  // expand with synonyms (full phrase + per-token)
+  const terms = new Set(tokens);
+  if(SYNONYMS[phrase]) SYNONYMS[phrase].forEach(s => terms.add(s.toLowerCase()));
+  tokens.forEach(t => { if(SYNONYMS[t]) SYNONYMS[t].forEach(s => terms.add(s.toLowerCase())); });
+  const termList=[...terms].filter(Boolean);
+  if(!termList.length) return [];
+
+  // intent boost: which sections/values does the best-matching intent point to?
+  const intentCrit = topIntentCriteria(phrase);
+
+  const scored=[];
+  CHAT_INDEX.forEach(e => {
+    let score=0, hitTokens=0;
+    termList.forEach(term => {
+      let hit=false;
+      if(e.res.includes(term)){ score+=6; hit=true; }
+      else if(e.cat.includes(term)){ score+=3; hit=true; }
+      else if(e.desc.includes(term)){ score+=2; hit=true; }
+      else if(e.sheet.includes(term)){ score+=1; hit=true; }
+      if(hit) hitTokens++;
+    });
+    if(score===0) return;
+    // exact / prefix title match should win
+    if(e.res===phrase) score+=20;
+    else if(phrase.length>3 && e.res.startsWith(phrase)) score+=10;
+    // phrase bonus: whole query appears verbatim
+    if(phrase.length>3 && (e.res.includes(phrase)||e.desc.includes(phrase))) score+=8;
+    // coverage bonus: matched most of the user's words
+    if(tokens.length>1) score += (hitTokens/tokens.length)*4;
+    // intent alignment bonus
+    if(intentCrit){
+      intentCrit.forEach(crit => {
+        const fv=(e.d[crit.field]||'').toLowerCase();
+        (crit.values||[]).forEach(v => { if(fv.includes(v.toLowerCase())) score+=crit.weight; });
       });
     }
-    if(bestScore > 0) scored.push({intent, score: bestScore, idx});
+    scored.push({d:e.d, score});
   });
 
-  // Sort by score desc
-  scored.sort((a,b) => b.score - a.score);
-
-  // 2. If no intent matched, fall back to keyword search
-  if(scored.length === 0 || (scored[0].intent.results.length === 0 && scored.length <= 1)){
-    if(scored.length > 0 && scored[0].intent.results.length === 0){
-      addChatMsg(scored[0].intent.msg, 'bot');
-      showFollowUp();
-      return;
-    }
-    fallbackSearch(q);
-    return;
+  scored.sort((a,b)=> b.score-a.score || a.d.resource.localeCompare(b.d.resource));
+  // relevance floor: drop the long tail of weak single-term matches
+  if(scored.length){
+    const floor=Math.max(3, scored[0].score*0.2);
+    for(let i=0;i<scored.length;i++){ if(scored[i].score<floor){ scored.length=i; break; } }
   }
+  // dedupe by resource name
+  const seen=new Set(), unique=[];
+  scored.forEach(x => { const k=x.d.resource.toLowerCase().trim(); if(!seen.has(k)){seen.add(k);unique.push(x);} });
+  return unique;
+}
 
-  // 3. Use top intent (or merge top 2 if close)
-  const top = scored[0].intent;
-  if(top.results.length === 0){
-    addChatMsg(top.msg, 'bot');
+// Find the best-matching intent's result criteria (signal, not a hard gate)
+function topIntentCriteria(q){
+  let best=null, bestScore=0;
+  CHAT_INTENTS.forEach(intent => {
+    let s=0;
+    intent.triggers.forEach(trig => {
+      if(q.includes(trig)) s=Math.max(s, trig.length*2+intent.priority);
+      else { const tw=trig.split(' '); if(tw.length>1 && tw.every(w=>q.includes(w))) s=Math.max(s, trig.length+intent.priority*0.7); }
+    });
+    if(s>bestScore){ bestScore=s; best=intent; }
+  });
+  return (best && best.results && best.results.length) ? best.results : null;
+}
+
+function processChat(query){
+  const q = query.toLowerCase().replace(/\s+/g,' ').trim();
+
+  // Conversational intents with no results (greetings/help/thanks) answer directly
+  const conv = CHAT_INTENTS.find(it => it.results.length===0 &&
+    it.triggers.some(t => q===t || q.includes(t)));
+  if(conv && rankChat(query).length===0){
+    addChatMsg(conv.msg, 'bot');
     showFollowUp();
     return;
   }
 
-  // 4. Score each DATA entry against the intent's result criteria
-  let dataScored = DATA.map(d => {
-    let score = 0;
-    top.results.forEach(crit => {
-      const fieldVal = (d[crit.field] || '').toLowerCase();
-      (crit.values || []).forEach(v => {
-        if(fieldVal.includes(v.toLowerCase())){
-          score += crit.weight;
-        }
-      });
-    });
-    return {d, score};
-  }).filter(x => x.score > 0);
-
-  // Sort by score desc, then by resource name
-  dataScored.sort((a,b) => b.score - a.score || a.d.resource.localeCompare(b.d.resource));
-
-  // Deduplicate by resource name (keep highest scored)
-  const seen = new Set();
-  const unique = [];
-  dataScored.forEach(x => {
-    const key = x.d.resource.toLowerCase().trim();
-    if(!seen.has(key)){seen.add(key); unique.push(x);}
-  });
-
-  // Diversify: max 2 entries per category to avoid flooding with similar items
-  const catCount = {};
-  const diverse = [];
-  unique.forEach(x => {
-    const cat = x.d.category || 'unknown';
-    catCount[cat] = (catCount[cat]||0) + 1;
-    if(catCount[cat] <= 2) diverse.push(x);
-  });
-
-  // Take top 8 from diversified list
-  const results = diverse.slice(0, 5).map(x => x.d);
-
-  if(results.length > 0){
-    addChatMsg(top.msg, 'bot');
-    addChatResults(results);
-  } else {
-    // Intent matched but no data found - fall back
-    fallbackSearch(q);
+  const ranked = rankChat(query);
+  if(!ranked.length){
+    // graceful no-match (never a flat dead-end)
+    addChatMsg("I couldn't find a match for that. Try a topic or tool name - for example \"validation\", \"ADaM\", \"survival analysis\", or \"FDA submission\". You can also use the search bar above to browse everything.", 'bot');
+    showFollowUp();
     return;
   }
-  showFollowUp();
-}
 
-function fallbackSearch(q){
-  // Use the main search engine (synonym expansion + fuzzy)
-  const expanded = expandSearch(q);
-  let results = DATA.map(d => {
-    const hay = (d.resource+' '+d.description+' '+d.category+' '+d.sheet).toLowerCase();
-    let score = 0;
-    expanded.forEach(term => {
-      if(hay.includes(term)){
-        // Weight by where the match is
-        if(d.resource.toLowerCase().includes(term)) score += 5;
-        else if(d.category.toLowerCase().includes(term)) score += 3;
-        else if(d.description.toLowerCase().includes(term)) score += 2;
-        else score += 1;
-      }
-    });
-    return {d, score};
-  }).filter(x => x.score > 0);
-
-  results.sort((a,b) => b.score - a.score);
-  const top = results.slice(0,5).map(x => x.d);
-
-  if(top.length > 0){
-    addChatMsg(`I found ${top.length} relevant resources for "${q}":`, 'bot');
-    addChatResults(top);
-  } else {
-    // Last resort fuzzy
-    const fuzzyResults = DATA.filter(d =>
-      fuzzyMatch(d.resource, q) > 0.35 || fuzzyMatch(d.description, q) > 0.25
-    ).slice(0,5);
-
-    if(fuzzyResults.length > 0){
-      addChatMsg("I'm not 100% sure about that, but these might help:", 'bot');
-      addChatResults(fuzzyResults);
-    } else {
-      addChatMsg("Sorry, I couldn't find a match. Try the search bar above - you can filter by section and search by any keyword.", 'bot');
-    }
+  // headline: prefer the matched intent's message, else a generic one
+  const crit = topIntentCriteria(q);
+  let headline = "Here's what I found:";
+  if(crit){
+    const it = CHAT_INTENTS.find(i => i.results===crit);
+    if(it) headline = it.msg;
   }
+
+  // diversify so one section doesn't flood the answer (max 3 per category)
+  const catCount={}, diverse=[];
+  ranked.forEach(x => {
+    const c=x.d.category||'?'; catCount[c]=(catCount[c]||0)+1;
+    if(catCount[c]<=3) diverse.push(x);
+  });
+  const shown = diverse.slice(0,6).map(x=>x.d);
+
+  addChatMsg(headline, 'bot');
+  addChatResults(shown, ranked.length, query);
   showFollowUp();
 }
 
@@ -1849,24 +1924,42 @@ body.appendChild(msg);
 body.scrollTop=body.scrollHeight;
 }
 
-function addChatResults(items){
+function chatEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// Push a query into the main search view and scroll to it
+function chatSeeAll(query){
+const inp=document.getElementById('search');
+inp.value=query;
+searchTerm=query.toLowerCase().trim();
+searchExpanded=expandSearch(searchTerm);
+document.getElementById('clearBtn').classList.add('vis');
+const sug=document.getElementById('aiSug');if(sug)sug.classList.remove('show');
+render();
+toggleChat();
+const sec=document.querySelector('.search-section')||document.getElementById('search');
+if(sec)sec.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function addChatResults(items,total,query){
 const body=document.getElementById('chatBody');
 const msg=document.createElement('div');
 msg.className='chat-msg bot';
 let h='<div class="chat-results">';
-items.slice(0,5).forEach(d=>{
+items.forEach(d=>{
 const col=COLORS[d.sheet]||'#64748B';
 h+=`<div class="chat-card">
 <div class="chat-card-body">
-<div class="chat-card-name">${d.resource}</div>
-<div class="chat-card-desc">${d.description}</div>
-<span class="chat-card-tag" style="background:${col}">${SHORT[d.sheet]||d.sheet}</span>
+<div class="chat-card-name">${chatEsc(d.resource)}</div>
+<div class="chat-card-desc">${chatEsc(d.description)}</div>
+<span class="chat-card-tag" style="background:${col}">${chatEsc(SHORT[d.sheet]||d.sheet)}</span>
 </div>
-<a href="${d.link}" target="_blank" rel="noopener">Open &#8599;</a>
+<a href="${chatEsc(d.link)}" target="_blank" rel="noopener">Open &#8599;</a>
 </div>`;
 });
-if(items.length>5)h+=`<div class="chat-bubble" style="font-size:0.75rem;color:var(--sub);margin-top:4px">...and ${items.length-5} more. Use the search bar above to see all results.</div>`;
 h+='</div>';
+if(total && total>items.length){
+h+=`<button class="chat-seeall" onclick="chatSeeAll('${chatEsc((query||'').replace(/'/g,"\\'"))}')">See all ${total} results in search &#8599;</button>`;
+}
 msg.innerHTML=h;
 body.appendChild(msg);
 body.scrollTop=body.scrollHeight;
@@ -1874,17 +1967,21 @@ body.scrollTop=body.scrollHeight;
 
 
 
+let chatDiscShown=false;
 function showFollowUp(){
-// Add disclaimer
 const body=document.getElementById('chatBody');
+// Show the accuracy note once per session, not after every reply
+if(!chatDiscShown){
+chatDiscShown=true;
 const disc=document.createElement('div');
 disc.className='chat-msg bot';
-disc.innerHTML='<div class="chat-disclaimer" style="margin:2px 0 6px">&#9432; Results may not be 100% accurate. Use the search bar above for best results.</div>';
+disc.innerHTML='<div class="chat-disclaimer" style="margin:2px 0 6px">&#9432; I match your words against the directory. If a result looks off, the search bar above searches everything.</div>';
 body.appendChild(disc);
+}
 body.scrollTop=body.scrollHeight;
 const sugs=document.getElementById('chatSugs');
 sugs.style.display='flex';
-const options=['CDISC standards','Validation tools','R packages','Drug coding','Regulatory guidelines','Submission package','SAP guidance','Protocol resources'];
+const options=['CDISC standards','Validation tools','R packages','Drug coding','Regulatory guidelines','Submission package','Survival analysis','Therapeutic areas','PK/PD','TLF graphics'];
 const shuffled=options.sort(()=>Math.random()-0.5).slice(0,3);
 sugs.innerHTML=shuffled.map(s=>`<div class="chat-sug" onclick="chatAsk('${s}')">${s}</div>`).join('');
 }
