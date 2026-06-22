@@ -1892,6 +1892,12 @@ document.getElementById('chatInput').value=text;
 sendChat();
 }
 
+// Optional AI backend. Leave '' to use the built-in rule-based finder only.
+// To enable conversational answers, deploy ai-worker/ to Cloudflare and paste
+// its URL here (see ai-worker/README.md). If the endpoint is empty or fails,
+// the chat automatically falls back to the rule-based finder below.
+const AI_ENDPOINT='';
+
 function sendChat(){
 const inp=document.getElementById('chatInput');
 const text=inp.value.trim();
@@ -1908,11 +1914,48 @@ typing.className='typing';
 typing.innerHTML='<span></span><span></span><span></span>';
 body.appendChild(typing);
 body.scrollTop=body.scrollHeight;
+const done=()=>{ if(typing.parentNode) typing.remove(); };
 
-setTimeout(()=>{
-typing.remove();
-processChat(text.toLowerCase());
-},600+Math.random()*400);
+if(AI_ENDPOINT){
+  aiChat(text, done);
+} else {
+  setTimeout(()=>{ done(); processChat(text.toLowerCase()); }, 600+Math.random()*400);
+}
+}
+
+// AI path: ground the model on resources our ranker already retrieved, so it
+// can only recommend real links. Any failure falls back to the rule-based bot.
+async function aiChat(text, done){
+const ranked = rankChat(text);
+const items = ranked.slice(0,8).map(x => ({
+  t:x.d.resource,
+  d:(x.d.description||'').slice(0,160),
+  s:SHORT[x.d.sheet]||x.d.sheet,
+  u:x.d.link
+}));
+try{
+  const ctrl=new AbortController();
+  const timer=setTimeout(()=>ctrl.abort(), 12000);
+  const res=await fetch(AI_ENDPOINT,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({q:text, items}),
+    signal:ctrl.signal
+  });
+  clearTimeout(timer);
+  if(!res.ok) throw new Error('http '+res.status);
+  const data=await res.json();
+  const answer=(data.answer||'').trim();
+  if(!answer) throw new Error('empty answer');
+  done();
+  addChatMsg(chatEsc(answer).replace(/\n/g,'<br>'), 'bot');
+  if(items.length) addChatResults(ranked.slice(0,6).map(x=>x.d), ranked.length, text);
+  showFollowUp();
+}catch(e){
+  // graceful fallback so the chat never dead-ends if the AI is down
+  done();
+  processChat(text.toLowerCase());
+}
 }
 
 function addChatMsg(text,type){
